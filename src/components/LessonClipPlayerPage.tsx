@@ -71,11 +71,6 @@ export const LessonClipPlayerPage: React.FC<LessonClipPlayerPageProps> = ({
   const activeScenario = alternateScenario ?? defaultScenario;
   const lessonTitle = storyboard?.title ?? selectedQuestion.topic;
   const lessonTopic = storyboard?.topic ?? selectedQuestion.topic;
-  const transcriptLines = activeScenario?.transcript ?? storyboard?.transcript ?? [
-    'Let the unknown values be variables and write the equations clearly.',
-    'Solve the system step by step and keep the reasoning visible.',
-    'Check the result against the original problem to confirm it still makes sense.',
-  ];
 
   const effectiveTime =
     activeFrame === '1_not_started'
@@ -95,6 +90,12 @@ export const LessonClipPlayerPage: React.FC<LessonClipPlayerPageProps> = ({
         (scene) => effectiveTime >= scene.startSecond && effectiveTime <= scene.endSecond,
       ) ?? storyboard.scenes[0]
     : undefined;
+
+  const transcriptLines = activeScenario?.transcript ?? storyboard?.transcript ?? [
+    'Let the unknown values be variables and write the equations clearly.',
+    'Solve the system step by step and keep the reasoning visible.',
+    'Check the result against the original problem to confirm it still makes sense.',
+  ];
 
   const questionDisplay = selectedQuestion.type === 'quadratic'
     ? ['x² - 5x + 6 = 0', '(x - 2)(x - 3) = 0']

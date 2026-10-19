@@ -1,8 +1,11 @@
+import React from 'react';
+import { renderToString } from 'react-dom/server';
 import { describe, it, expect } from 'vitest';
 import { solveLinearSystem, solveQuadraticExact, createFraction, addFractions, subtractFractions, multiplyFractions, divideFractions } from './math-engine.ts';
 import { buildLessonTemplateFromQuestion, getQuestionsByType } from './lesson-templates.ts';
 import { buildClipStoryboard, getStoryboardById } from './clip-storyboard.ts';
 import { evaluateSubstitutionAnswer } from './scenario-generator.ts';
+import { LessonClipPlayerPage } from '../components/LessonClipPlayerPage';
 
 describe('fraction arithmetic', () => {
   it('adds fractions exactly', () => {
@@ -47,6 +50,21 @@ describe('quadratic solving', () => {
     expect(result.roots).toHaveLength(2);
     expect(result.roots[0]).toEqual({ numerator: 2, denominator: 1 });
     expect(result.roots[1]).toEqual({ numerator: -1, denominator: 2 });
+  });
+});
+
+describe('lesson player render', () => {
+  it('renders the lesson player on a pinned early frame without crashing', () => {
+    const html = renderToString(
+      React.createElement(LessonClipPlayerPage, {
+        lessonId: 'simultaneous-1',
+        onExit: () => undefined,
+        initialFrame: '2_playing_early',
+      }),
+    );
+
+    expect(html).toContain('Solve');
+    expect(html).toContain('Simultaneous equations');
   });
 });
 

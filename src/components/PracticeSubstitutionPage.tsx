@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ArrowLeft,
   Check,
@@ -10,6 +10,7 @@ import {
   Sparkles,
   Search,
 } from 'lucide-react';
+import { questionBank } from '../data/questionBank';
 
 type PracticePageVariant =
   | 'default'
@@ -56,70 +57,85 @@ export const PracticeSubstitutionPage: React.FC<PracticeSubstitutionPageProps> =
     variant === 'filter-hard' ? 'hard' : 'all'
   );
 
+  const toPracticeItem = (
+    question: (typeof questionBank)[number],
+    index: number,
+    overrides: Partial<QuestionItem> = {},
+  ): QuestionItem => ({
+    id: index + 1,
+    numberLabel: `Question ${index + 1}`,
+    difficulty:
+      question.difficulty === 'starter' ? 'Easy' : question.difficulty === 'core' ? 'Medium' : 'Hard',
+    status: 'not_tried',
+    statusLabel: 'Not tried',
+    eq1: question.prompt,
+    actionType: 'open',
+    ...overrides,
+  });
+
+  const simultaneousPractice: QuestionItem[] = questionBank
+    .filter((question) => question.type === 'simultaneous')
+    .map((question, index) => {
+      const eqParts = question.prompt
+        .replace(/^Solve\s*[:\-]?\s*/i, '')
+        .replace(/^the simultaneous equations:\s*/i, '')
+        .replace(/\s+and\s+/i, ' | ')
+        .split('|')
+        .map((part) => part.trim())
+        .filter(Boolean);
+
+      return toPracticeItem(question, index, {
+        eq1: eqParts[0] ?? question.prompt,
+        eq2: eqParts[1],
+        notes: question.tags.includes('substitution') ? 'Substitution practice' : question.tags.includes('elimination') ? 'Elimination practice' : undefined,
+      });
+    });
+
+  const quadraticPractice: QuestionItem[] = questionBank
+    .filter((question) => question.type === 'quadratic')
+    .map((question, index) =>
+      toPracticeItem(question, index, {
+        eq1: question.prompt,
+        eq2: undefined,
+        notes: 'Quadratic practice',
+      }),
+    );
+
+  const wordProblemPractice: QuestionItem[] = questionBank
+    .filter((question) => question.type === 'word-problem')
+    .map((question, index) =>
+      toPracticeItem(question, index, {
+        eq1: '',
+        isWordProblem: true,
+        wordProblemText: question.prompt,
+        notes: 'Word problem practice',
+      }),
+    );
+
   const defaultQuestions: QuestionItem[] = [
+    ...simultaneousPractice,
+    ...quadraticPractice,
+    ...wordProblemPractice,
     {
-      id: 1,
-      numberLabel: 'Question 1',
-      difficulty: 'Easy',
-      status: 'solved',
-      statusLabel: 'Solved',
-      eq1: 'x + y = 10',
-      eq2: 'y = 2x + 1',
-      notes: 'No hints used',
-      actionType: 'open',
-    },
-    {
-      id: 2,
-      numberLabel: 'Question 2',
-      difficulty: 'Easy',
-      status: 'solved',
-      statusLabel: 'Solved',
-      eq1: 'y = 3x - 2',
-      eq2: '2x + y = 13',
-      notes: '1 hint used',
-      actionType: 'open',
-    },
-    {
-      id: 3,
-      numberLabel: 'Question 3',
+      id: 99,
+      numberLabel: 'Question 99',
       difficulty: 'Medium',
-      status: 'needed_solution',
-      statusLabel: 'Needed the full solution',
+      status: 'not_tried',
+      statusLabel: 'Not tried',
       eq1: 'x = 4 - y',
       eq2: '3x + 2y = 9',
-      notes: '3 hints used. A similar question is ready.',
-      actionType: 'similar',
-    },
-    {
-      id: 4,
-      numberLabel: 'Question 4',
-      difficulty: 'Medium',
-      status: 'not_tried',
-      statusLabel: 'Not tried',
-      eq1: '2x + y = 11',
-      eq2: '3x - 2y = 6',
+      notes: 'Substitute the rearranged expression into the second equation.',
       actionType: 'open',
     },
     {
-      id: 5,
-      numberLabel: 'Question 5',
-      difficulty: 'Medium',
-      status: 'not_tried',
-      statusLabel: 'Not tried',
-      eq1: '',
-      isWordProblem: true,
-      wordProblemText:
-        '2 adult tickets and 3 child tickets cost $23. 1 adult ticket and 2 child tickets cost $13. Find the price of each ticket.',
-      actionType: 'open',
-    },
-    {
-      id: 6,
-      numberLabel: 'Question 6',
+      id: 100,
+      numberLabel: 'Question 100',
       difficulty: 'Hard',
       status: 'not_tried',
       statusLabel: 'Not tried',
       eq1: '3x - 2y = 4',
       eq2: '2x + 5y = 9',
+      notes: 'Advanced elimination practice.',
       actionType: 'open',
     },
   ];
@@ -133,6 +149,7 @@ export const PracticeSubstitutionPage: React.FC<PracticeSubstitutionPageProps> =
       statusLabel: 'Not tried',
       eq1: '2x + 3y = 12',
       eq2: '2x - y = 4',
+      notes: 'Eliminate x by subtracting the equations.',
       actionType: 'open',
     },
     {
@@ -143,6 +160,7 @@ export const PracticeSubstitutionPage: React.FC<PracticeSubstitutionPageProps> =
       statusLabel: 'Not tried',
       eq1: 'x + 2y = 7',
       eq2: 'x - y = 1',
+      notes: 'Subtract to remove x quickly.',
       actionType: 'open',
     },
     {
@@ -153,6 +171,7 @@ export const PracticeSubstitutionPage: React.FC<PracticeSubstitutionPageProps> =
       statusLabel: 'Not tried',
       eq1: '3x + y = 11',
       eq2: 'x + 2y = 8',
+      notes: 'Multiply one equation before eliminating.',
       actionType: 'open',
     },
     {
@@ -163,6 +182,7 @@ export const PracticeSubstitutionPage: React.FC<PracticeSubstitutionPageProps> =
       statusLabel: 'Not tried',
       eq1: '5x - 2y = 11',
       eq2: 'x + y = 6',
+      notes: 'Use elimination to solve for x first.',
       actionType: 'open',
     },
     {
@@ -173,13 +193,68 @@ export const PracticeSubstitutionPage: React.FC<PracticeSubstitutionPageProps> =
       statusLabel: 'Not tried',
       eq1: '4x + 3y = 22',
       eq2: '2x - y = 4',
+      notes: 'Multiply one equation and eliminate the same variable.',
+      actionType: 'open',
+    },
+    {
+      id: 6,
+      numberLabel: 'Question 6',
+      difficulty: 'Hard',
+      status: 'not_tried',
+      statusLabel: 'Not tried',
+      eq1: '5x + 2y = 19',
+      eq2: '3x + 4y = 23',
+      notes: 'A good practice set for balancing coefficients.',
       actionType: 'open',
     },
   ];
 
+  const wordProblemQuestions: QuestionItem[] = [
+    ...wordProblemPractice,
+    {
+      id: 4,
+      numberLabel: 'Question 4',
+      difficulty: 'Easy',
+      status: 'not_tried',
+      statusLabel: 'Not tried',
+      eq1: '',
+      isWordProblem: true,
+      wordProblemText: 'A school sold 35 tickets in total. Student tickets cost $3 and adult tickets cost $5. The total revenue was $135. How many of each were sold?',
+      actionType: 'open',
+    },
+    {
+      id: 5,
+      numberLabel: 'Question 5',
+      difficulty: 'Medium',
+      status: 'not_tried',
+      statusLabel: 'Not tried',
+      eq1: '',
+      isWordProblem: true,
+      wordProblemText: 'A rectangle has perimeter 26 cm and length is 3 cm more than width. Find the dimensions.',
+      actionType: 'open',
+    },
+    {
+      id: 6,
+      numberLabel: 'Question 6',
+      difficulty: 'Hard',
+      status: 'not_tried',
+      statusLabel: 'Not tried',
+      eq1: '',
+      isWordProblem: true,
+      wordProblemText: 'The product of two consecutive integers is 72. Find the integers.',
+      actionType: 'open',
+    },
+  ];
+
+  const practiceQuestionsByTab: Record<'substitution' | 'elimination' | 'word_problems', QuestionItem[]> = {
+    substitution: defaultQuestions,
+    elimination: eliminationQuestions,
+    word_problems: wordProblemQuestions,
+  };
+
   const questionsByVariant: Record<string, QuestionItem[]> = {
     default: defaultQuestions,
-    'filter-hard': [defaultQuestions[5]],
+    'filter-hard': [...defaultQuestions.filter((q) => q.difficulty === 'Hard')],
     'nothing-tried': defaultQuestions.map((q) => ({ ...q, status: 'not_tried', notes: undefined })),
     'making-question': defaultQuestions,
     'new-question-added': [
@@ -200,8 +275,23 @@ export const PracticeSubstitutionPage: React.FC<PracticeSubstitutionPageProps> =
     mobile: defaultQuestions,
   };
 
-  const [questions, setQuestions] = useState<QuestionItem[]>(questionsByVariant[variant] ?? defaultQuestions);
+  const [questions, setQuestions] = useState<QuestionItem[]>(() => practiceQuestionsByTab[activeTab]);
   const [isRefreshing, setIsRefreshing] = useState(variant === 'making-question');
+
+  useEffect(() => {
+    if (variant !== 'default' && variant !== 'mobile') {
+      const nextQuestions = questionsByVariant[variant] ?? practiceQuestionsByTab[activeTab];
+      setQuestions(nextQuestions);
+      return;
+    }
+
+    setQuestions(practiceQuestionsByTab[activeTab]);
+    setDifficultyFilter('all');
+  }, [activeTab, variant]);
+
+  useEffect(() => {
+    setDifficultyFilter('all');
+  }, [activeTab]);
 
   const handleGetNewQuestion = () => {
     setIsRefreshing(true);
@@ -227,6 +317,13 @@ export const PracticeSubstitutionPage: React.FC<PracticeSubstitutionPageProps> =
     return q.difficulty.toLowerCase() === difficultyFilter;
   });
 
+  const currentPracticeTitle =
+    activeTab === 'substitution'
+      ? 'Practice: Substitution'
+      : activeTab === 'elimination'
+      ? 'Practice: Elimination'
+      : 'Practice: Word problems';
+
   const renderEquation = (eq: string) =>
     eq.split(' ').map((token, index) => {
       if (token.includes('x')) {
@@ -246,7 +343,9 @@ export const PracticeSubstitutionPage: React.FC<PracticeSubstitutionPageProps> =
       return <span key={`${token}-${index}`}>{token} </span>;
     });
 
-  const effectiveQuestions = variant === 'filter-hard' ? [defaultQuestions[5]] : filteredQuestions;
+  const effectiveQuestions = variant === 'filter-hard'
+    ? defaultQuestions.filter((q) => q.difficulty === 'Hard')
+    : filteredQuestions;
   const listMessage = variant === 'nothing-tried' ? 'Start with an easy one. You can ask for a hint at any time.' : null;
   const showLoadError = variant === 'load-error';
   const showSkeleton = variant === 'making-question';
@@ -291,7 +390,7 @@ export const PracticeSubstitutionPage: React.FC<PracticeSubstitutionPageProps> =
           <div className="flex flex-col w-full">
             <header className="w-full mb-7">
               <h1 className="font-serif text-[32px] font-semibold text-[#17201D] tracking-[-0.01em] leading-tight">
-                Practice: Substitution
+                {currentPracticeTitle}
               </h1>
               <p className="text-[16px] text-[#4A5551] mt-2 leading-relaxed">
                 Work through these on your own. If you get stuck, open a question and choose I'm stuck.
