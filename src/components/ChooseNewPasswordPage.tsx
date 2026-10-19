@@ -59,67 +59,30 @@ export const ChooseNewPasswordPage: React.FC<ChooseNewPasswordPageProps> = ({
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF8F4] text-[#17201D] font-sans antialiased selection:bg-[#DCEBE6] selection:text-[#0E5A4B]">
-      {/* Top Frame Switcher Bar to preview all four requested states */}
-      <div className="w-full bg-[#FFFFFF] border-b border-[#DDD8CC] px-4 py-2 flex items-center justify-between text-xs overflow-x-auto z-30">
-        <div className="flex items-center gap-1.5 shrink-0">
-          <span className="text-[#4A5551] font-medium mr-2">Password reset states:</span>
-          {(
-            [
-              { id: 'link_sent', label: '1. Link sent' },
-              { id: 'choose_password', label: '2. Set password (valid)' },
-              { id: 'submitting', label: '2. Submitting' },
-              { id: 'password_changed', label: '3. Password changed' },
-              { id: 'link_expired', label: '4. Link expired' },
-            ] as const
-          ).map((frame) => {
-            const isActive = activeFrame === frame.id;
-            return (
-              <button
-                key={frame.id}
-                type="button"
-                onClick={() => setActiveFrame(frame.id)}
-                className={`px-2.5 py-1 rounded-[8px] font-medium transition-colors cursor-pointer ${
-                  isActive
-                    ? 'bg-[#DCEBE6] text-[#0E5A4B]'
-                    : 'text-[#4A5551] hover:text-[#17201D] hover:bg-[#FAF8F4]'
-                }`}
-              >
-                {frame.label}
-              </button>
-            );
-          })}
+    <div className="min-h-screen flex flex-col justify-between bg-[#FAF8F4] text-[#17201D] font-sans antialiased selection:bg-[#DCEBE6] selection:text-[#0E5A4B]">
+      {/* Top Header */}
+      <header className="w-full border-b border-[#DDD8CC]/70 bg-[#FAF8F4]">
+        <div className="max-w-[1120px] mx-auto px-6 h-16 flex items-center justify-between">
+          <button
+            onClick={onNavigateHome}
+            aria-label="Silo Home"
+            className="font-serif text-2xl font-semibold text-[#17201D] tracking-tight hover:opacity-90 transition-opacity cursor-pointer text-left"
+          >
+            Silo
+          </button>
+          <button
+            onClick={onNavigateLogin}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-[#4A5551] hover:text-[#17201D] transition-colors cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4 text-[#7D8883]" strokeWidth={1.5} />
+            <span>Back to log in</span>
+          </button>
         </div>
-        <div className="text-[#4A5551] text-[11px] hidden sm:block shrink-0">
-          Screen 7 · Split desktop 1280px
-        </div>
-      </div>
+      </header>
 
-      {/* Main Container: Two-Column Split */}
-      <div className="flex-1 flex w-full">
-        {/* LEFT HALF: Form Column */}
-        <div className="w-full lg:w-1/2 flex flex-col justify-between px-6 py-6 md:px-12 md:py-8 lg:px-16 min-h-[calc(100vh-41px)]">
-          {/* Top Bar inside Left Column */}
-          <header className="flex items-center justify-between w-full">
-            <button
-              onClick={onNavigateHome}
-              aria-label="Silo Home"
-              className="font-serif text-2xl font-semibold text-[#17201D] tracking-tight hover:opacity-90 transition-opacity cursor-pointer text-left"
-            >
-              Silo
-            </button>
-            <button
-              onClick={onNavigateLogin}
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-[#4A5551] hover:text-[#17201D] transition-colors cursor-pointer"
-            >
-              <ArrowLeft className="w-4 h-4 text-[#7D8883]" strokeWidth={1.5} />
-              <span>Back to log in</span>
-            </button>
-          </header>
-
-          {/* Center Form Area: Identical 400px width and vertical position in every frame */}
-          <main className="my-auto py-12 flex justify-center w-full">
-            <div className="w-full max-w-[400px]">
+      {/* Main Content: Centered on Paper Background (No RHS panel) */}
+      <main className="flex-grow flex flex-col items-center justify-center px-4 py-12 md:py-16">
+        <div className="w-full max-w-[400px] mx-auto">
               {/* ========================================================
                   FRAME 1: LINK SENT
                  ======================================================== */}
@@ -388,70 +351,38 @@ export const ChooseNewPasswordPage: React.FC<ChooseNewPasswordPageProps> = ({
                   </div>
                 </div>
               )}
-            </div>
-          </main>
-
-          {/* Minimal Bottom Footer in Left Column */}
-          <footer className="flex items-center justify-between w-full text-xs text-[#4A5551] pt-4">
-            <span>&copy; 2025 Silo</span>
-            <div className="flex items-center gap-4">
-              <button
-                type="button"
-                onClick={() => onNavigatePrivacyTerms('summary')}
-                className="hover:underline cursor-pointer"
-              >
-                Privacy
-              </button>
-              <button
-                type="button"
-                onClick={() => onNavigatePrivacyTerms('terms-of-use')}
-                className="hover:underline cursor-pointer"
-              >
-                Terms
-              </button>
-              <button
-                type="button"
-                onClick={() => onNavigatePrivacyTerms('contact')}
-                className="hover:underline cursor-pointer"
-              >
-                Contact
-              </button>
-            </div>
-          </footer>
         </div>
+      </main>
 
-        {/* RIGHT HALF: Photo Panel with Overlay Card (stays unchanged in every frame) */}
-        <div className="hidden lg:block lg:w-1/2 p-4 min-h-[calc(100vh-41px)] sticky top-[41px] h-[calc(100vh-41px)]">
-          <div className="relative w-full h-full min-h-[640px] rounded-[12px] overflow-hidden bg-[#F4F1EA] border border-[#DDD8CC]">
-            {/* Editorial Documentary Photo */}
-            <img
-              alt="Student studying with notepad and phone at desk"
-              className="absolute inset-0 w-full h-full object-cover object-center"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEb39MLI1GUc8vt95mviWkEtgZJFYVrKfdSxEOBPxuVtOpyYEWxIaLHMWlOOcdrBcxbiPDTccpYSvs0jL1snD0gFx7kaJ3qKGiNcGhJZ3Tkf3LMvovZ-OTdJgLOtWlXn0W8WeXuWHPTvtnDtf6Xxjp_rpKTTTaxGSSoPlZPA8V1lNIh9oKzoWI-ouzAy8ZZ3nfP7IY4_9qovqLj6m_uHqpMf6bY92fVAPLl151V7FGijqfFDVc-dy0"
-              referrerPolicy="no-referrer"
-            />
-            {/* Overlay Card: Bottom Left, 12px from panel edges, 280px wide */}
-            <div className="absolute bottom-3 left-3 z-20 w-[280px] bg-white/95 backdrop-blur-md rounded-[8px] p-3.5 border border-[#DDD8CC]/80">
-              <div className="flex items-center justify-between pb-1.5 border-b border-[#DDD8CC]/60 mb-2">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#0E5A4B]">
-                  Account Security
-                </span>
-                <span className="flex items-center gap-1 text-[11px] text-[#0E5A4B] font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#0E5A4B]" />
-                  Verified link
-                </span>
-              </div>
-              <p className="text-xs text-[#17201D] font-medium leading-snug">
-                Choose a strong password to protect your study notes and problem history across Simultaneous and Quadratic equations.
-              </p>
-              <div className="mt-2 pt-1.5 border-t border-[#DDD8CC]/40 flex items-center justify-between text-[11px]">
-                <span className="text-[#0E5A4B] font-medium">Substitution · Elimination · Word problems</span>
-                <span className="text-[#4A5551]">Step 2/2</span>
-              </div>
-            </div>
+      {/* Minimal Bottom Footer */}
+      <footer className="w-full border-t border-[#DDD8CC]/70 py-6 bg-[#FAF8F4]">
+        <div className="max-w-[1120px] mx-auto px-6 flex items-center justify-between text-xs text-[#4A5551]">
+          <span>&copy; 2025 Silo</span>
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => onNavigatePrivacyTerms('summary')}
+              className="hover:underline cursor-pointer"
+            >
+              Privacy
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigatePrivacyTerms('terms-of-use')}
+              className="hover:underline cursor-pointer"
+            >
+              Terms
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigatePrivacyTerms('contact')}
+              className="hover:underline cursor-pointer"
+            >
+              Contact
+            </button>
           </div>
         </div>
-      </div>
+      </footer>
     </div>
   );
 };

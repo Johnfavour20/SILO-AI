@@ -21,15 +21,24 @@ import { ChooseNewPasswordPage } from './components/ChooseNewPasswordPage.tsx';
 import { OnboardingProfilePage } from './components/OnboardingProfilePage.tsx';
 import { DashboardPage } from './components/DashboardPage.tsx';
 import { TopicPage } from './components/TopicPage.tsx';
-import { SessionRunner } from './components/SessionRunner.tsx';
+import { LessonClipPlayerPage } from './components/LessonClipPlayerPage.tsx';
 import { TopicPickerModal } from './components/TopicPickerModal.tsx';
 import { ReportModal } from './components/ReportModal.tsx';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<
-    'home' | 'pricing' | 'privacy-terms' | 'signup' | 'login' | 'forgot-password' | 'choose-new-password' | 'onboarding' | 'dashboard' | 'topic-page'
+    | 'home'
+    | 'pricing'
+    | 'privacy-terms'
+    | 'signup'
+    | 'login'
+    | 'forgot-password'
+    | 'choose-new-password'
+    | 'onboarding'
+    | 'dashboard'
+    | 'topic-page'
+    | 'lesson-clip'
   >('home');
-  const [activeSessionScenarioId, setActiveSessionScenarioId] = useState<string | null>(null);
   const [isTopicModalOpen, setIsTopicModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -42,13 +51,10 @@ export default function App() {
     }, 3200);
   };
 
-  const handleStartSession = (scenarioId: string = 'fundraiser-stall') => {
-    setActiveSessionScenarioId(scenarioId);
+  const handleStartSession = (_scenarioId?: string) => {
+    setIsTopicModalOpen(false);
+    setCurrentPage('topic-page');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleCloseSession = () => {
-    setActiveSessionScenarioId(null);
   };
 
   const handleExploreFeedback = () => {
@@ -84,31 +90,6 @@ export default function App() {
     showToast(message);
     setCurrentPage('dashboard');
   };
-
-  // If in active session, render the interactive scenario session workspace
-  if (activeSessionScenarioId) {
-    return (
-      <>
-        <SessionRunner
-          initialScenarioId={activeSessionScenarioId}
-          onClose={handleCloseSession}
-          onOpenReport={() => setIsReportModalOpen(true)}
-          onSelectAnotherScenario={() => setIsTopicModalOpen(true)}
-        />
-        <TopicPickerModal
-          isOpen={isTopicModalOpen}
-          onClose={() => setIsTopicModalOpen(false)}
-          onSelectScenario={(id) => {
-            setActiveSessionScenarioId(id);
-          }}
-        />
-        <ReportModal
-          isOpen={isReportModalOpen}
-          onClose={() => setIsReportModalOpen(false)}
-        />
-      </>
-    );
-  }
 
   // Standalone full screen for Sign-up (Screen 4)
   if (currentPage === 'signup') {
@@ -329,7 +310,42 @@ export default function App() {
             setCurrentPage('dashboard');
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          onSelectLesson={(id) => handleStartSession(id)}
+          onSelectLesson={(_id) => {
+            setCurrentPage('lesson-clip');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+        />
+      </>
+    );
+  }
+
+  // Standalone Screen 12: Focused Lesson Clip Player (Substitution clip player)
+  if (currentPage === 'lesson-clip') {
+    return (
+      <>
+        {toastMessage && (
+          <div className="fixed bottom-6 right-6 z-50 bg-[#17201D] text-white text-xs px-4 py-2.5 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in">
+            <span className="material-symbols-outlined text-[16px] text-[#1E6B3A]">
+              check_circle
+            </span>
+            <span>{toastMessage}</span>
+          </div>
+        )}
+        <LessonClipPlayerPage
+          onExit={() => {
+            setCurrentPage('topic-page');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onOpenReport={() => setIsReportModalOpen(true)}
+          onNextStep={() => {
+            showToast('Step 2 completed! Ready for guided questions in Step 3.');
+            setCurrentPage('topic-page');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+        />
+        <ReportModal
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
         />
       </>
     );

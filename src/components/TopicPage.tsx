@@ -194,38 +194,27 @@ export const TopicPage: React.FC<TopicPageProps> = ({
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Left column (about 7 columns): vertical lesson path inside one white card */}
           <div className="lg:col-span-7 bg-[#FFFFFF] border border-[#DDD8CC] rounded-[12px] p-6">
-            <div className="space-y-2">
+            <div className="relative space-y-2">
+              {/* Single continuous vertical connector line behind all radio markers */}
+              <div
+                aria-hidden="true"
+                className="absolute top-[28px] bottom-[28px] left-[28px] -translate-x-1/2 w-[2px] bg-[#DDD8CC] z-0 pointer-events-none"
+              />
+
               {activeLessons.map((lesson, idx) => {
-                const isFirst = idx === 0;
-                const isLast = idx === activeLessons.length - 1;
                 const isCurrent = lesson.status === 'current';
 
                 return (
                   <div
                     key={lesson.id}
-                    className={`relative px-4 py-3.5 rounded-[8px] transition-colors ${
-                      isCurrent ? 'bg-[#DCEBE6]' : ''
+                    onClick={() => onSelectLesson(lesson.id)}
+                    className={`relative px-4 py-3.5 rounded-[8px] transition-colors cursor-pointer hover:bg-[#F4F1EA]/70 ${
+                      isCurrent ? 'bg-[#DCEBE6] hover:bg-[#DCEBE6]' : ''
                     }`}
                   >
                     <div className="flex items-start gap-4">
                       {/* Marker Column: exactly 24px wide, mathematically centers both the line and marker */}
                       <div className="relative w-6 h-6 flex items-center justify-center shrink-0 mt-0.5">
-                        {/* Line segment going UP to previous row - sits behind marker */}
-                        {!isFirst && (
-                          <div
-                            aria-hidden="true"
-                            className="absolute top-[-24px] bottom-1/2 left-1/2 -translate-x-1/2 w-[2px] bg-[#DDD8CC] z-0 pointer-events-none"
-                          />
-                        )}
-
-                        {/* Line segment going DOWN to next row - sits behind marker */}
-                        {!isLast && (
-                          <div
-                            aria-hidden="true"
-                            className="absolute top-1/2 bottom-[-24px] left-1/2 -translate-x-1/2 w-[2px] bg-[#DDD8CC] z-0 pointer-events-none"
-                          />
-                        )}
-
                         {/* Marker: Done (green check) */}
                         {lesson.status === 'done' && (
                           <div className="relative z-10 w-6 h-6 rounded-full bg-[#0E5A4B] text-[#FFFFFF] flex items-center justify-center shadow-none">
@@ -233,14 +222,14 @@ export const TopicPage: React.FC<TopicPageProps> = ({
                           </div>
                         )}
 
-                        {/* Marker: Current (green ring with green inner dot, solid white opaque background masking the line underneath) */}
+                        {/* Marker: Current (green ring with green inner dot, opaque container background masking the line underneath) */}
                         {lesson.status === 'current' && (
-                          <div className="relative z-10 w-6 h-6 rounded-full border-2 border-[#0E5A4B] bg-[#FFFFFF] flex items-center justify-center">
+                          <div className="relative z-10 w-6 h-6 rounded-full border-2 border-[#0E5A4B] bg-[#DCEBE6] flex items-center justify-center">
                             <div className="w-2.5 h-2.5 rounded-full bg-[#0E5A4B]" />
                           </div>
                         )}
 
-                        {/* Marker: Upcoming (empty outline circle with solid white opaque background) */}
+                        {/* Marker: Upcoming (empty outline circle with solid white opaque background masking the line underneath) */}
                         {lesson.status === 'upcoming' && (
                           <div className="relative z-10 w-6 h-6 rounded-full border border-[#DDD8CC] bg-[#FFFFFF]" />
                         )}

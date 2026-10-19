@@ -42,32 +42,31 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
 
   return (
     <div className="min-h-screen bg-[#FAF8F4] flex flex-col justify-between selection:bg-[#EAF3F0] selection:text-[#0E5A4B] text-[#17201D]">
-      <div className="flex-1 flex w-full">
-        {/* LEFT HALF: Form Column */}
-        <div className="w-full lg:w-1/2 flex flex-col justify-between px-6 py-6 md:px-12 md:py-8 lg:px-16 min-h-screen">
-          {/* Top Bar inside Left Column */}
-          <header className="flex items-center justify-between w-full">
+      {/* Top Header */}
+      <header className="w-full border-b border-[#DDD8CC]/70 bg-[#FAF8F4]">
+        <div className="max-w-[1120px] mx-auto px-6 h-16 flex items-center justify-between">
+          <button
+            onClick={onNavigateHome}
+            aria-label="Silo Home"
+            className="font-headline font-semibold text-[22px] tracking-tight text-[#17201D] hover:opacity-85 transition-opacity cursor-pointer text-left"
+          >
+            Silo
+          </button>
+          <div className="flex items-center gap-1.5 text-sm text-[#4A5551]">
+            <span>Already have an account?</span>
             <button
-              onClick={onNavigateHome}
-              aria-label="Silo Home"
-              className="font-headline font-semibold text-[22px] tracking-tight text-[#17201D] hover:opacity-85 transition-opacity cursor-pointer text-left"
+              onClick={onNavigateLogin}
+              className="text-[#0E5A4B] font-medium hover:underline focus-visible:underline underline-offset-4 cursor-pointer"
             >
-              Silo
+              Log in
             </button>
-            <div className="flex items-center gap-1.5 text-sm text-[#4A5551]">
-              <span>Already have an account?</span>
-              <button
-                onClick={onNavigateLogin}
-                className="text-[#0E5A4B] font-medium hover:underline focus-visible:underline underline-offset-4 cursor-pointer"
-              >
-                Log in
-              </button>
-            </div>
-          </header>
+          </div>
+        </div>
+      </header>
 
-          {/* Main Form Content */}
-          <main className="my-auto py-10 flex justify-center w-full">
-            <div className="w-full max-w-[400px]">
+      {/* Main Form Content: Centered */}
+      <main className="flex-grow flex flex-col items-center justify-center px-4 py-12 md:py-16">
+        <div className="w-full max-w-[400px] mx-auto">
               <div className="mb-6">
                 <h1 className="font-headline text-[28px] leading-tight font-semibold text-[#17201D] tracking-tight mb-2">
                   Create your account
@@ -251,66 +250,35 @@ export const SignUpPage: React.FC<SignUpPageProps> = ({
             </div>
           </main>
 
-          {/* Minimal Bottom Footer */}
-          <footer className="flex items-center justify-between w-full text-xs text-[#4A5551] pt-4">
-            <span>&copy; 2025 Silo</span>
-            <div className="flex items-center gap-4">
-              <button
-                type="button"
-                onClick={() => onNavigatePrivacyTerms('summary')}
-                className="hover:underline cursor-pointer"
-              >
-                Privacy
-              </button>
-              <button
-                type="button"
-                onClick={() => onNavigatePrivacyTerms('terms-of-use')}
-                className="hover:underline cursor-pointer"
-              >
-                Terms
-              </button>
-              <button
-                type="button"
-                onClick={() => onNavigatePrivacyTerms('contact')}
-                className="hover:underline cursor-pointer"
-              >
-                Contact
-              </button>
-            </div>
-          </footer>
-        </div>
-
-        {/* RIGHT HALF: Photo Panel with Functional Topic Overlay Card (Screen 4: Simultaneous equations) */}
-        <div className="hidden lg:block lg:w-1/2 p-4 min-h-screen sticky top-0 h-screen">
-          <div className="relative w-full h-full min-h-[640px] rounded-[12px] overflow-hidden bg-[#F4F1EA] border border-[#DDD8CC]">
-            <img
-              alt="High school students studying mathematics collaboratively"
-              className="absolute inset-0 w-full h-full object-cover object-center"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEb39MLI1GUc8vt95mviWkEtgZJFYVrKfdSxEOBPxuVtOpyYEWxIaLHMWlOOcdrBcxbiPDTccpYSvs0jL1snD0gFx7kaJ3qKGiNcGhJZ3Tkf3LMvovZ-OTdJgLOtWlXn0W8WeXuWHPTvtnDtf6Xxjp_rpKTTTaxGSSoPlZPA8V1lNIh9oKzoWI-ouzAy8ZZ3nfP7IY4_9qovqLj6m_uHqpMf6bY92fVAPLl151V7FGijqfFDVc-dy0"
-              referrerPolicy="no-referrer"
-            />
-            {/* Functional Overlay Card: Bottom Left, 16px from panel edges, 280px wide */}
-            <div className="absolute bottom-4 left-4 z-20 w-[290px] bg-white/95 backdrop-blur-md rounded-[12px] p-4 border border-[#DDD8CC]/80 shadow-lg">
-              <div className="flex items-center justify-between pb-1.5 border-b border-[#DDD8CC]/60 mb-2">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#0E5A4B]">
-                  Simultaneous equations
-                </span>
-                <span className="flex items-center gap-1 text-[11px] text-[#0E5A4B] font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#0E5A4B]" />
-                  Active topic
-                </span>
-              </div>
-              <p className="text-xs text-[#17201D] font-medium leading-snug">
-                Substitution, elimination, and word problems with two unknowns.
-              </p>
-              <div className="mt-2.5 pt-2 border-t border-[#DDD8CC]/40 flex items-center justify-between text-[11px]">
-                <span className="text-[#0E5A4B] font-medium">Substitution · Elimination · Word problems</span>
-                <span className="text-[#4A5551]">3 lessons</span>
-              </div>
-            </div>
+      {/* Minimal Bottom Footer */}
+      <footer className="w-full border-t border-[#DDD8CC]/70 py-6 bg-[#FAF8F4]">
+        <div className="max-w-[1120px] mx-auto px-6 flex items-center justify-between text-xs text-[#4A5551]">
+          <span>&copy; 2025 Silo</span>
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => onNavigatePrivacyTerms('summary')}
+              className="hover:underline cursor-pointer"
+            >
+              Privacy
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigatePrivacyTerms('terms-of-use')}
+              className="hover:underline cursor-pointer"
+            >
+              Terms
+            </button>
+            <button
+              type="button"
+              onClick={() => onNavigatePrivacyTerms('contact')}
+              className="hover:underline cursor-pointer"
+            >
+              Contact
+            </button>
           </div>
         </div>
-      </div>
+      </footer>
     </div>
   );
 };

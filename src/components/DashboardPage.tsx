@@ -86,18 +86,18 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   const chartData: SessionBarData[] = [
     { date: '3 Oct', hints: 3, concept: 'Word problems' },
     { date: '5 Oct', hints: 3, concept: 'Elimination' },
-    { date: '8 Oct', hints: 2, concept: 'Factorising' },
-    { date: '10 Oct', hints: 3, concept: 'Quadratic formula' },
+    { date: '8 Oct', hints: 2, concept: 'Substitution' },
+    { date: '10 Oct', hints: 3, concept: 'Word problems' },
     { date: '13 Oct', hints: 2, concept: 'Word problems' },
     { date: '15 Oct', hints: 1, concept: 'Elimination' },
     { date: '16 Oct', hints: 1, concept: 'Substitution' },
     { date: '17 Oct', hints: 2, concept: 'Substitution' },
   ];
 
-  // Screen 10 Concepts list
+  // Screen 10 Concepts list (Strictly: Simultaneous & Quadratic equations, covering Substitution, Elimination, Word problems)
   const conceptsData: ConceptProgressItem[] = [
     {
-      id: 'substitution',
+      id: 'substitution-sim',
       name: 'Substitution',
       topic: 'Simultaneous equations',
       sessionsCount: 2,
@@ -110,7 +110,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       scenarioId: 'simultaneous-lunch',
     },
     {
-      id: 'elimination',
+      id: 'elimination-sim',
       name: 'Elimination',
       topic: 'Simultaneous equations',
       sessionsCount: 1,
@@ -123,7 +123,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       scenarioId: 'simultaneous-lunch',
     },
     {
-      id: 'word-problems',
+      id: 'word-problems-sim',
       name: 'Word problems',
       topic: 'Simultaneous equations',
       sessionsCount: 1,
@@ -136,8 +136,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       scenarioId: 'simultaneous-lunch',
     },
     {
-      id: 'factorising',
-      name: 'Factorising',
+      id: 'substitution-quad',
+      name: 'Substitution',
       topic: 'Quadratic equations',
       sessionsCount: 1,
       lastPractised: '8 Oct',
@@ -149,8 +149,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       scenarioId: 'fundraiser-stall',
     },
     {
-      id: 'quadratic-formula',
-      name: 'Quadratic formula',
+      id: 'word-problems-quad',
+      name: 'Word problems',
       topic: 'Quadratic equations',
       sessionsCount: 3,
       lastPractised: '10 Oct',
@@ -496,7 +496,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                   </button>
                 </div>
 
-                {/* Item 2: Factorising */}
+                {/* Item 2: Word problems */}
                 <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-[8px] bg-[#F6E3BE] text-[#17201D] flex items-center justify-center shrink-0">
@@ -504,7 +504,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                     </div>
                     <div>
                       <div className="text-[15px] font-medium text-[#17201D]">
-                        Factorising
+                        Word problems
                       </div>
                       <div className="text-[13px] text-[#4A5551]">
                         The last lesson was not finished.
@@ -640,13 +640,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                       </td>
                     </tr>
 
-                    {/* 4. Quadratic formula */}
+                    {/* 4. Word problems */}
                     <tr
                       onClick={() => handleStart('fundraiser-stall')}
                       className="hover:bg-[#FAF8F4] transition-colors cursor-pointer"
                     >
                       <td className="py-3.5 px-5">
-                        <div className="font-medium text-[#17201D]">Quadratic formula</div>
+                        <div className="font-medium text-[#17201D]">Word problems</div>
                         <div className="text-[12px] text-[#4A5551]">Quadratic equations</div>
                       </td>
                       <td className="py-3.5 px-4 text-[13px] text-[#4A5551] hidden sm:table-cell">
@@ -662,13 +662,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                       </td>
                     </tr>
 
-                    {/* 5. Factorising */}
+                    {/* 5. Substitution */}
                     <tr
                       onClick={() => handleStart('fundraiser-stall')}
                       className="hover:bg-[#FAF8F4] transition-colors cursor-pointer"
                     >
                       <td className="py-3.5 px-5">
-                        <div className="font-medium text-[#17201D]">Factorising</div>
+                        <div className="font-medium text-[#17201D]">Substitution</div>
                         <div className="text-[12px] text-[#4A5551]">Quadratic equations</div>
                       </td>
                       <td className="py-3.5 px-4 text-[13px] text-[#4A5551] hidden sm:table-cell">
