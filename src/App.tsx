@@ -28,6 +28,7 @@ import { LessonCompletePage } from './components/LessonCompletePage.tsx';
 import { HistoryPage } from './components/HistoryPage.tsx';
 import { TopicPickerModal } from './components/TopicPickerModal.tsx';
 import { ReportModal } from './components/ReportModal.tsx';
+import { questionBank } from './data/questionBank.ts';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<
@@ -50,8 +51,12 @@ export default function App() {
   const [isTopicModalOpen, setIsTopicModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [selectedLessonId, setSelectedLessonId] = useState<string>('simultaneous-1');
+  const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>('simultaneous-1');
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const selectedQuestion =
+    questionBank.find((item) => item.id === selectedQuestionId) ?? questionBank[0];
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -155,8 +160,7 @@ export default function App() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           onNavigateForgotPassword={() => {
-            setCurrentPage('forgot-password');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showToast('Password reset is not part of the current demo flow.');
           }}
           onNavigatePrivacyTerms={handleOpenPrivacyTerms}
           onLogInSuccess={(email) => {
@@ -383,6 +387,7 @@ export default function App() {
           </div>
         )}
         <GuidedQuestionPage
+          question={selectedQuestion}
           onExit={() => {
             setCurrentPage('topic-page');
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -483,8 +488,11 @@ export default function App() {
             setCurrentPage('topic-page');
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          onOpenQuestion={(qId) => {
-            showToast(`Opening Question ${qId} in solver`);
+          onOpenQuestion={(questionId) => {
+            const matchingQuestion =
+              questionBank.find((item) => item.id === questionId) ?? questionBank[0];
+            setSelectedQuestionId(matchingQuestion.id);
+            showToast(`Opening ${matchingQuestion.topic}: ${matchingQuestion.prompt}`);
             setCurrentPage('guided-question');
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}

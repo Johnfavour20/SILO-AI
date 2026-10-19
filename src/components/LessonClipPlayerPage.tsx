@@ -45,13 +45,13 @@ export const LessonClipPlayerPage: React.FC<LessonClipPlayerPageProps> = ({
   onExit,
   onOpenReport,
   onNextStep,
-  initialFrame = '2_playing_early',
+  initialFrame = 'interactive',
 }) => {
   // Current active frame selection
   const [activeFrame, setActiveFrame] = useState<FrameId>(initialFrame);
   // Playback simulation states
   const [isPlaying, setIsPlaying] = useState(true);
-  const [currentTime, setCurrentTime] = useState(17);
+  const [currentTime, setCurrentTime] = useState(0);
   const totalDuration = 32;
   const [speed, setSpeed] = useState<'0.75x' | '1x' | '1.25x'>('1x');
   const [captionsOn, setCaptionsOn] = useState(true);
@@ -108,6 +108,16 @@ export const LessonClipPlayerPage: React.FC<LessonClipPlayerPageProps> = ({
     : selectedQuestion.type === 'word-problem'
     ? ['Let n and n + 1 be consecutive integers', 'n² + n - 42 = 0']
     : ['d = 11 - 2b', 'b = 4 and d = 3'];
+
+  useEffect(() => {
+    setActiveFrame('interactive');
+    setCurrentTime(2);
+    setIsPlaying(true);
+    setVoiceOn(false);
+    setIsExplainMenuOpen(false);
+    setIsTranscriptOpen(false);
+    setCurrentStepIndex(2);
+  }, [lessonId]);
 
   // Automatically configure state variables when pinned to a specific frame
   useEffect(() => {
@@ -185,6 +195,13 @@ export const LessonClipPlayerPage: React.FC<LessonClipPlayerPageProps> = ({
         setCurrentStepIndex(2);
         break;
       case 'interactive':
+        setIsPlaying(true);
+        setCurrentTime(0);
+        setVoiceOn(false);
+        setIsExplainMenuOpen(false);
+        setIsTranscriptOpen(false);
+        setCurrentStepIndex(2);
+        break;
       default:
         // leave dynamic
         break;
@@ -258,13 +275,13 @@ export const LessonClipPlayerPage: React.FC<LessonClipPlayerPageProps> = ({
 
   const handlePlayClipFromPoster = () => {
     setActiveFrame('interactive');
-    setCurrentTime(0);
+    setCurrentTime(2);
     setIsPlaying(true);
   };
 
   const handleReplay = () => {
     setActiveFrame('interactive');
-    setCurrentTime(0);
+    setCurrentTime(2);
     setIsPlaying(true);
   };
 

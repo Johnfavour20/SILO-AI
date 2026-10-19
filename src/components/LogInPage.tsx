@@ -119,17 +119,10 @@ export const LogInPage: React.FC<LogInPageProps> = ({
                 </div>
 
                 <div>
-                  <div className="flex items-center justify-between mb-1.5">
+                  <div className="mb-1.5">
                     <label className="block text-sm font-medium text-[#17201D]" htmlFor="login-password">
                       Password
                     </label>
-                    <button
-                      type="button"
-                      onClick={onNavigateForgotPassword}
-                      className="text-xs text-[#0E5A4B] hover:underline cursor-pointer"
-                    >
-                      Forgot password?
-                    </button>
                   </div>
                   <div className="relative">
                     <input

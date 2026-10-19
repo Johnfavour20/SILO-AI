@@ -1,0 +1,769 @@
+{
+  "version": 1,
+  "title": "Silo maths learning bank",
+  "topics": [
+    {
+      "id": "simultaneous-equations",
+      "name": "Simultaneous equations",
+      "subtopics": [
+        {
+          "id": "substitution",
+          "name": "Substitution",
+          "questions": [
+            {
+              "id": "simultaneous-substitution-easy-1",
+              "tier": "easy",
+              "question": "Solve the simultaneous equations: 2x + y = 11 and x - y = 1.",
+              "answer": "x = 4, y = 3",
+              "method": "substitution",
+              "solutionSteps": [
+                { "step": 1, "type": "rearrange", "text": "From x - y = 1, rearrange to x = y + 1." },
+                { "step": 2, "type": "substitute", "text": "Substitute x = y + 1 into 2x + y = 11 to get 2(y + 1) + y = 11." },
+                { "step": 3, "type": "simplify", "text": "Expand and simplify: 2y + 2 + y = 11, so 3y = 9." },
+                { "step": 4, "type": "solve", "text": "Solve y = 3." },
+                { "step": 5, "type": "back-substitute", "text": "Substitute y = 3 into x = y + 1, giving x = 4." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Rearrange one equation so a variable is by itself." },
+                { "level": "one-line", "prompt": "Use x = y + 1 and replace x in the other equation." },
+                { "level": "together", "prompt": "Expand, simplify, and solve for y before finding x." },
+                { "level": "different-example", "prompt": "Try the same substitution method in a snack or ticket context." }
+              ],
+              "alternateScenarioTemplates": [
+                {
+                  "id": "shop-tickets",
+                  "title": "School tickets",
+                  "story": "The school sells adult and child tickets. One ticket type is 1 more than the other.",
+                  "equations": ["a + c = 11", "a - c = 1"],
+                  "answer": "a = 6, c = 5"
+                }
+              ]
+            },
+            {
+              "id": "simultaneous-substitution-easy-2",
+              "tier": "easy",
+              "question": "Solve the simultaneous equations: x = y + 2 and x + y = 10.",
+              "answer": "x = 6, y = 4",
+              "method": "substitution",
+              "solutionSteps": [
+                { "step": 1, "type": "substitute", "text": "Substitute x = y + 2 into x + y = 10." },
+                { "step": 2, "type": "simplify", "text": "This gives (y + 2) + y = 10, so 2y + 2 = 10." },
+                { "step": 3, "type": "solve", "text": "Solve 2y = 8, so y = 4." },
+                { "step": 4, "type": "back-substitute", "text": "Substitute y = 4 back into x = y + 2, giving x = 6." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Replace x with y + 2 before doing anything else." },
+                { "level": "one-line", "prompt": "Write (y + 2) + y = 10." },
+                { "level": "together", "prompt": "Solve for y first, then use it to find x." },
+                { "level": "different-example", "prompt": "Use the same idea with a total-cost problem." }
+              ]
+            },
+            {
+              "id": "simultaneous-substitution-medium-1",
+              "tier": "medium",
+              "question": "Solve the simultaneous equations: y = 3x - 2 and 2x + y = 13.",
+              "answer": "x = 3, y = 7",
+              "method": "substitution",
+              "solutionSteps": [
+                { "step": 1, "type": "substitute", "text": "Substitute y = 3x - 2 into 2x + y = 13." },
+                { "step": 2, "type": "simplify", "text": "This gives 2x + (3x - 2) = 13." },
+                { "step": 3, "type": "solve", "text": "Simplify to 5x - 2 = 13, so 5x = 15 and x = 3." },
+                { "step": 4, "type": "back-substitute", "text": "Substitute x = 3 into y = 3x - 2 to get y = 7." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "The second equation already has y by itself. Replace y with 3x - 2." },
+                { "level": "one-line", "prompt": "Write 2x + (3x - 2) = 13." },
+                { "level": "together", "prompt": "Collect like terms, solve x, then find y." },
+                { "level": "different-example", "prompt": "Try a shop-price example with the same method." }
+              ]
+            },
+            {
+              "id": "simultaneous-substitution-medium-2",
+              "tier": "medium",
+              "question": "Solve the simultaneous equations: x = 4 - y and 3x + 2y = 9.",
+              "answer": "x = 1, y = 3",
+              "method": "substitution",
+              "solutionSteps": [
+                { "step": 1, "type": "substitute", "text": "Substitute x = 4 - y into 3x + 2y = 9." },
+                { "step": 2, "type": "simplify", "text": "This gives 3(4 - y) + 2y = 9." },
+                { "step": 3, "type": "solve", "text": "Expand: 12 - 3y + 2y = 9, so 12 - y = 9, hence y = 3." },
+                { "step": 4, "type": "back-substitute", "text": "Substitute y = 3 into x = 4 - y, so x = 1." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Replace x with 4 - y in the second equation." },
+                { "level": "one-line", "prompt": "Write 3(4 - y) + 2y = 9." },
+                { "level": "together", "prompt": "Expand carefully and solve for y before finding x." },
+                { "level": "different-example", "prompt": "Try a different story with the same substitution pattern." }
+              ]
+            },
+            {
+              "id": "simultaneous-substitution-hard-1",
+              "tier": "hard",
+              "question": "Solve the simultaneous equations: 2x + y = 11 and 3x - 2y = 6.",
+              "answer": "x = 4, y = 3",
+              "method": "substitution",
+              "solutionSteps": [
+                { "step": 1, "type": "rearrange", "text": "From 2x + y = 11, rearrange to y = 11 - 2x." },
+                { "step": 2, "type": "substitute", "text": "Substitute y = 11 - 2x into 3x - 2y = 6." },
+                { "step": 3, "type": "simplify", "text": "This becomes 3x - 2(11 - 2x) = 6." },
+                { "step": 4, "type": "solve", "text": "Expand: 3x - 22 + 4x = 6, so 7x = 28 and x = 4." },
+                { "step": 5, "type": "back-substitute", "text": "Substitute into y = 11 - 2x: y = 3." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Pick the equation that makes the rearranging simpler and isolate y." },
+                { "level": "one-line", "prompt": "Write y = 11 - 2x, then substitute into the other equation." },
+                { "level": "together", "prompt": "Expand carefully and solve for x before finding y." },
+                { "level": "different-example", "prompt": "Use the same pattern with a fruit or lunch-price example." }
+              ]
+            },
+            {
+              "id": "simultaneous-substitution-hard-2",
+              "tier": "hard",
+              "question": "Solve the simultaneous equations: 4x - y = 5 and 3x + 2y = 12.",
+              "answer": "x = 2, y = 3",
+              "method": "substitution",
+              "solutionSteps": [
+                { "step": 1, "type": "rearrange", "text": "From 4x - y = 5, rearrange to y = 4x - 5." },
+                { "step": 2, "type": "substitute", "text": "Substitute into 3x + 2y = 12: 3x + 2(4x - 5) = 12." },
+                { "step": 3, "type": "simplify", "text": "Expand: 3x + 8x - 10 = 12, so 11x = 22." },
+                { "step": 4, "type": "solve", "text": "So x = 2." },
+                { "step": 5, "type": "back-substitute", "text": "Substitute x = 2 into y = 4x - 5, giving y = 3." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Rearrange the first equation to make y the subject." },
+                { "level": "one-line", "prompt": "Write y = 4x - 5 and replace y in the second equation." },
+                { "level": "together", "prompt": "Solve for x, then return to the rearranged equation to find y." },
+                { "level": "different-example", "prompt": "Repeat the same process with a money or pricing example." }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "elimination",
+          "name": "Elimination",
+          "questions": [
+            {
+              "id": "simultaneous-elimination-easy-1",
+              "tier": "easy",
+              "question": "Solve the simultaneous equations: x + y = 7 and x - y = 3.",
+              "answer": "x = 5, y = 2",
+              "method": "elimination",
+              "solutionSteps": [
+                { "step": 1, "type": "add", "text": "Add the equations to eliminate y: (x + y) + (x - y) = 7 + 3." },
+                { "step": 2, "type": "simplify", "text": "This gives 2x = 10." },
+                { "step": 3, "type": "solve", "text": "So x = 5." },
+                { "step": 4, "type": "back-substitute", "text": "Substitute x = 5 into x + y = 7 to get 5 + y = 7, so y = 2." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Add the two equations because the y terms are opposites." },
+                { "level": "one-line", "prompt": "Write 2x = 10." },
+                { "level": "together", "prompt": "Solve x, then substitute back to find y." },
+                { "level": "different-example", "prompt": "Try the same elimination idea in a sum-and-difference context." }
+              ]
+            },
+            {
+              "id": "simultaneous-elimination-easy-2",
+              "tier": "easy",
+              "question": "Solve the simultaneous equations: x + y = 12 and x - y = 2.",
+              "answer": "x = 7, y = 5",
+              "method": "elimination",
+              "solutionSteps": [
+                { "step": 1, "type": "add", "text": "Add the equations to eliminate y: 2x = 14." },
+                { "step": 2, "type": "solve", "text": "So x = 7." },
+                { "step": 3, "type": "back-substitute", "text": "Substitute into x + y = 12: 7 + y = 12, so y = 5." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Add the equations because the y terms cancel." },
+                { "level": "one-line", "prompt": "Use 2x = 14." },
+                { "level": "together", "prompt": "Solve x, then return to one equation to find y." },
+                { "level": "different-example", "prompt": "Try a slightly different sum-and-difference problem." }
+              ]
+            },
+            {
+              "id": "simultaneous-elimination-medium-1",
+              "tier": "medium",
+              "question": "Solve the simultaneous equations: 3x + 2y = 16 and x - y = 2.",
+              "answer": "x = 4, y = 2",
+              "method": "elimination",
+              "solutionSteps": [
+                { "step": 1, "type": "rearrange", "text": "Rearrange x - y = 2 to x = y + 2." },
+                { "step": 2, "type": "multiply", "text": "Multiply x = y + 2 by 3, giving 3x = 3y + 6." },
+                { "step": 3, "type": "eliminate", "text": "Use this with 3x + 2y = 16 to subtract: (3x + 2y) - (3x) = 16 - (3y + 6), giving 2y = 10 - 3y." },
+                { "step": 4, "type": "solve", "text": "This simplifies to 5y = 10, so y = 2, and then x = 4." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Make x the subject in the second equation so you can line up the variables." },
+                { "level": "one-line", "prompt": "Write x = y + 2 and then use it in the first equation." },
+                { "level": "together", "prompt": "Solve for y first, then substitute back to find x." },
+                { "level": "different-example", "prompt": "Repeat the same pattern with a different price problem." }
+              ]
+            },
+            {
+              "id": "simultaneous-elimination-medium-2",
+              "tier": "medium",
+              "question": "Solve the simultaneous equations: 2x + 3y = 13 and 4x - y = 5.",
+              "answer": "x = 2, y = 3",
+              "method": "elimination",
+              "solutionSteps": [
+                { "step": 1, "type": "multiply", "text": "Multiply the second equation by 3 to get 12x - 3y = 15." },
+                { "step": 2, "type": "add", "text": "Add this to 2x + 3y = 13 to eliminate y: 14x = 28." },
+                { "step": 3, "type": "solve", "text": "So x = 2." },
+                { "step": 4, "type": "back-substitute", "text": "Substitute x = 2 into 2x + 3y = 13: 4 + 3y = 13, so y = 3." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Aim to cancel the y terms by matching their coefficients." },
+                { "level": "one-line", "prompt": "Multiply the second equation by 3 to get 12x - 3y = 15." },
+                { "level": "together", "prompt": "Add the equations to remove y, then solve for x." },
+                { "level": "different-example", "prompt": "Try the same matching-coefficients method in a fresh context." }
+              ]
+            },
+            {
+              "id": "simultaneous-elimination-hard-1",
+              "tier": "hard",
+              "question": "Solve the simultaneous equations: 3x - 2y = 4 and 2x + 5y = 9.",
+              "answer": "x = 2, y = 1",
+              "method": "elimination",
+              "solutionSteps": [
+                { "step": 1, "type": "multiply", "text": "Multiply the first equation by 5 and the second by 2 to get the same y coefficient." },
+                { "step": 2, "type": "simplify", "text": "This gives 15x - 10y = 20 and 4x + 10y = 18." },
+                { "step": 3, "type": "add", "text": "Add the equations: 19x = 38, so x = 2." },
+                { "step": 4, "type": "back-substitute", "text": "Substitute x = 2 into 3x - 2y = 4: 6 - 2y = 4, so y = 1." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Match the coefficients of y so the terms can cancel." },
+                { "level": "one-line", "prompt": "Multiply the first equation by 5 and the second equation by 2." },
+                { "level": "together", "prompt": "Add the equations, solve x, then find y." },
+                { "level": "different-example", "prompt": "Use this same format in a different pricing or ticket story." }
+              ]
+            },
+            {
+              "id": "simultaneous-elimination-hard-2",
+              "tier": "hard",
+              "question": "Solve the simultaneous equations: 4x + 3y = 18 and 3x + 5y = 19.",
+              "answer": "x = 3, y = 2",
+              "method": "elimination",
+              "solutionSteps": [
+                { "step": 1, "type": "multiply", "text": "Multiply the first equation by 5 and the second by 3 to match the x coefficient." },
+                { "step": 2, "type": "simplify", "text": "This gives 20x + 15y = 90 and 9x + 15y = 57." },
+                { "step": 3, "type": "subtract", "text": "Subtract the second from the first: 11x = 33, so x = 3." },
+                { "step": 4, "type": "back-substitute", "text": "Substitute into 4x + 3y = 18 to get 12 + 3y = 18, so y = 2." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Match one variable's coefficients first so you can eliminate it." },
+                { "level": "one-line", "prompt": "Write the equations with matching x coefficients." },
+                { "level": "together", "prompt": "Subtract, solve x, then find y by substitution." },
+                { "level": "different-example", "prompt": "Try the same elimination pattern in a new symbolic setting." }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "word-problems",
+          "name": "Word problems",
+          "questions": [
+            {
+              "id": "simultaneous-word-easy-1",
+              "tier": "easy",
+              "question": "The sum of two numbers is 18 and their difference is 4. Find the numbers.",
+              "answer": "11 and 7",
+              "method": "word-problem",
+              "solutionSteps": [
+                { "step": 1, "type": "define", "text": "Let the numbers be x and y." },
+                { "step": 2, "type": "equations", "text": "Write x + y = 18 and x - y = 4." },
+                { "step": 3, "type": "add", "text": "Add the equations to eliminate y: 2x = 22." },
+                { "step": 4, "type": "solve", "text": "So x = 11." },
+                { "step": 5, "type": "back-substitute", "text": "Substitute back: 11 + y = 18, so y = 7." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Define the two numbers as x and y, then write the sum and difference equations." },
+                { "level": "one-line", "prompt": "Write x + y = 18 and x - y = 4." },
+                { "level": "together", "prompt": "Add the equations because the y terms cancel." },
+                { "level": "different-example", "prompt": "Use the same sum-and-difference structure in a new story." }
+              ]
+            },
+            {
+              "id": "simultaneous-word-easy-2",
+              "tier": "easy",
+              "question": "2 pens and 1 notebook cost $7. 1 pen and 1 notebook cost $4. Find the price of each.",
+              "answer": "Pen $3, notebook $1",
+              "method": "word-problem",
+              "solutionSteps": [
+                { "step": 1, "type": "define", "text": "Let p be the price of a pen and n be the price of a notebook." },
+                { "step": 2, "type": "equations", "text": "Write 2p + n = 7 and p + n = 4." },
+                { "step": 3, "type": "subtract", "text": "Subtract the second equation from the first: p = 3." },
+                { "step": 4, "type": "back-substitute", "text": "Substitute into p + n = 4: 3 + n = 4, so n = 1." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Choose variables for the pen and notebook costs." },
+                { "level": "one-line", "prompt": "Write 2p + n = 7 and p + n = 4." },
+                { "level": "together", "prompt": "Subtract the equations to remove n." },
+                { "level": "different-example", "prompt": "Try a new shopping story with the same structure." }
+              ]
+            },
+            {
+              "id": "simultaneous-word-medium-1",
+              "tier": "medium",
+              "question": "A rectangle has perimeter 30 cm and its length is 3 cm longer than its width. Find the dimensions.",
+              "answer": "Width 6 cm, length 9 cm",
+              "method": "word-problem",
+              "solutionSteps": [
+                { "step": 1, "type": "define", "text": "Let width = w and length = w + 3." },
+                { "step": 2, "type": "equation", "text": "Use the perimeter formula: 2(w + (w + 3)) = 30." },
+                { "step": 3, "type": "simplify", "text": "This gives 2(2w + 3) = 30, so 4w + 6 = 30." },
+                { "step": 4, "type": "solve", "text": "Subtract 6: 4w = 24, so w = 6." },
+                { "step": 5, "type": "final", "text": "Length = w + 3 = 9 cm." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Let the width be w and write the length as w + 3." },
+                { "level": "one-line", "prompt": "Use 2(w + (w + 3)) = 30." },
+                { "level": "together", "prompt": "Simplify the expression and solve for w." },
+                { "level": "different-example", "prompt": "Use the same perimeter idea with a new rectangle context." }
+              ]
+            },
+            {
+              "id": "simultaneous-word-medium-2",
+              "tier": "medium",
+              "question": "Adult tickets cost $12 and child tickets cost $8. 90 tickets raised $920. How many of each were sold?",
+              "answer": "50 adult, 40 child",
+              "method": "word-problem",
+              "solutionSteps": [
+                { "step": 1, "type": "define", "text": "Let a be the number of adult tickets and c be the number of child tickets." },
+                { "step": 2, "type": "equations", "text": "Write a + c = 90 and 12a + 8c = 920." },
+                { "step": 3, "type": "simplify", "text": "Multiply the first equation by 8: 8a + 8c = 720." },
+                { "step": 4, "type": "subtract", "text": "Subtract from the second: 4a = 200, so a = 50." },
+                { "step": 5, "type": "back-substitute", "text": "Then 50 + c = 90, so c = 40." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Choose variables for the number of adult and child tickets." },
+                { "level": "one-line", "prompt": "Write a + c = 90 and 12a + 8c = 920." },
+                { "level": "together", "prompt": "Match the coefficients, subtract, and solve for a." },
+                { "level": "different-example", "prompt": "Try a fresh pricing problem with the same structure." }
+              ]
+            },
+            {
+              "id": "simultaneous-word-hard-1",
+              "tier": "hard",
+              "question": "Tolu is 4 years older than twice Bisi's age. In 5 years, the sum of their ages will be 41. How old is each now?",
+              "answer": "Tolu 22, Bisi 9",
+              "method": "word-problem",
+              "solutionSteps": [
+                { "step": 1, "type": "define", "text": "Let B be Bisi's age now and T be Tolu's age now." },
+                { "step": 2, "type": "equations", "text": "Write T = 2B + 4 and (T + 5) + (B + 5) = 41." },
+                { "step": 3, "type": "simplify", "text": "The second equation gives T + B + 10 = 41, so T + B = 31." },
+                { "step": 4, "type": "solve", "text": "Substitute T = 2B + 4 into T + B = 31, giving 3B + 4 = 31, so B = 9." },
+                { "step": 5, "type": "final", "text": "Then T = 2(9) + 4 = 22." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Let Bisi's age be B and write Tolu's age in terms of B." },
+                { "level": "one-line", "prompt": "Write T = 2B + 4 and (T + 5) + (B + 5) = 41." },
+                { "level": "together", "prompt": "Simplify the age equation, then substitute the expression for T." },
+                { "level": "different-example", "prompt": "Use the same age-relationship pattern in a new story." }
+              ]
+            },
+            {
+              "id": "simultaneous-word-hard-2",
+              "tier": "hard",
+              "question": "A trader mixes rice at $3 per kg with rice at $5 per kg to make 40 kg worth $4.50 per kg. How many kg of each?",
+              "answer": "10 kg at $3, 30 kg at $5",
+              "method": "word-problem",
+              "solutionSteps": [
+                { "step": 1, "type": "define", "text": "Let x be the mass of $3 rice and y be the mass of $5 rice." },
+                { "step": 2, "type": "equations", "text": "Write x + y = 40 and 3x + 5y = 180." },
+                { "step": 3, "type": "simplify", "text": "Multiply the first equation by 3: 3x + 3y = 120." },
+                { "step": 4, "type": "subtract", "text": "Subtract: 2y = 60, so y = 30." },
+                { "step": 5, "type": "back-substitute", "text": "Then x = 10." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Choose variables for the amount of each type of rice." },
+                { "level": "one-line", "prompt": "Write x + y = 40 and 3x + 5y = 180." },
+                { "level": "together", "prompt": "Match the coefficients and eliminate x or y." },
+                { "level": "different-example", "prompt": "Try the same mixture method in a different blend problem." }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "quadratic-equations",
+      "name": "Quadratic equations",
+      "subtopics": [
+        {
+          "id": "factorising",
+          "name": "Factorising",
+          "questions": [
+            {
+              "id": "quadratic-factorising-easy-1",
+              "tier": "easy",
+              "question": "Solve x² − 5x + 6 = 0.",
+              "answer": "x = 2 or x = 3",
+              "method": "factorising",
+              "solutionSteps": [
+                { "step": 1, "type": "factorise", "text": "Find two numbers that multiply to 6 and add to -5: -2 and -3." },
+                { "step": 2, "type": "write-factors", "text": "So x² − 5x + 6 = (x - 2)(x - 3)." },
+                { "step": 3, "type": "zero-product", "text": "Set each factor equal to zero: x - 2 = 0 or x - 3 = 0." },
+                { "step": 4, "type": "solve", "text": "Therefore x = 2 or x = 3." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Look for two numbers that multiply to the constant and add to the x coefficient." },
+                { "level": "one-line", "prompt": "Write (x - 2)(x - 3) = 0." },
+                { "level": "together", "prompt": "Use the zero-product rule to solve each factor." },
+                { "level": "different-example", "prompt": "Try the same factorising idea on a similar quadratic." }
+              ]
+            },
+            {
+              "id": "quadratic-factorising-easy-2",
+              "tier": "easy",
+              "question": "Solve x² + 7x + 12 = 0.",
+              "answer": "x = -3 or x = -4",
+              "method": "factorising",
+              "solutionSteps": [
+                { "step": 1, "type": "factorise", "text": "Find two numbers that multiply to 12 and add to 7: 3 and 4." },
+                { "step": 2, "type": "write-factors", "text": "So x² + 7x + 12 = (x + 3)(x + 4)." },
+                { "step": 3, "type": "zero-product", "text": "Set each factor equal to zero." },
+                { "step": 4, "type": "solve", "text": "So x = -3 or x = -4." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Find two numbers that add to 7 and multiply to 12." },
+                { "level": "one-line", "prompt": "Write (x + 3)(x + 4) = 0." },
+                { "level": "together", "prompt": "Set both factors to zero and solve." },
+                { "level": "different-example", "prompt": "Try another factorising quadratic with positive roots." }
+              ]
+            },
+            {
+              "id": "quadratic-factorising-medium-1",
+              "tier": "medium",
+              "question": "Solve x² − 7x + 10 = 0.",
+              "answer": "x = 2 or x = 5",
+              "method": "factorising",
+              "solutionSteps": [
+                { "step": 1, "type": "factorise", "text": "Find two numbers that multiply to 10 and add to -7: -2 and -5." },
+                { "step": 2, "type": "write-factors", "text": "So x² − 7x + 10 = (x - 2)(x - 5)." },
+                { "step": 3, "type": "zero-product", "text": "Set each factor to zero." },
+                { "step": 4, "type": "solve", "text": "Hence x = 2 or x = 5." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Look for two negative numbers because the constant is positive and the middle term is negative." },
+                { "level": "one-line", "prompt": "Write (x - 2)(x - 5) = 0." },
+                { "level": "together", "prompt": "Use the zero-product rule to solve both values of x." },
+                { "level": "different-example", "prompt": "Try another quadratic with the same sign pattern." }
+              ]
+            },
+            {
+              "id": "quadratic-factorising-medium-2",
+              "tier": "medium",
+              "question": "Solve x² + 2x − 15 = 0.",
+              "answer": "x = 3 or x = -5",
+              "method": "factorising",
+              "solutionSteps": [
+                { "step": 1, "type": "factorise", "text": "Find two numbers that multiply to -15 and add to 2: 5 and -3." },
+                { "step": 2, "type": "write-factors", "text": "So x² + 2x - 15 = (x + 5)(x - 3)." },
+                { "step": 3, "type": "zero-product", "text": "Set both factors equal to zero." },
+                { "step": 4, "type": "solve", "text": "So x = -5 or x = 3." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "The constant is negative, so the factor pair must have opposite signs." },
+                { "level": "one-line", "prompt": "Write (x + 5)(x - 3) = 0." },
+                { "level": "together", "prompt": "Set each factor equal to zero and solve." },
+                { "level": "different-example", "prompt": "Use the same sign logic on another mixed-sign quadratic." }
+              ]
+            },
+            {
+              "id": "quadratic-factorising-hard-1",
+              "tier": "hard",
+              "question": "Solve 2x² − 3x − 2 = 0.",
+              "answer": "x = 2 or x = -1/2",
+              "method": "factorising",
+              "solutionSteps": [
+                { "step": 1, "type": "factorise", "text": "Factorise the quadratic: (2x + 1)(x - 2) = 0." },
+                { "step": 2, "type": "zero-product", "text": "Set each factor equal to zero." },
+                { "step": 3, "type": "solve", "text": "2x + 1 = 0 gives x = -1/2; x - 2 = 0 gives x = 2." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Try factoring a quadratic with a leading coefficient greater than 1." },
+                { "level": "one-line", "prompt": "Write (2x + 1)(x - 2) = 0." },
+                { "level": "together", "prompt": "Use the zero-product rule to solve each factor." },
+                { "level": "different-example", "prompt": "Apply the same method to a similar coefficient-leading quadratic." }
+              ]
+            },
+            {
+              "id": "quadratic-factorising-hard-2",
+              "tier": "hard",
+              "question": "Solve 6x² + x − 2 = 0.",
+              "answer": "x = 1/2 or x = -2/3",
+              "method": "factorising",
+              "solutionSteps": [
+                { "step": 1, "type": "factorise", "text": "Factorise the quadratic: (3x + 2)(2x - 1) = 0." },
+                { "step": 2, "type": "zero-product", "text": "Set each factor equal to zero." },
+                { "step": 3, "type": "solve", "text": "3x + 2 = 0 gives x = -2/3; 2x - 1 = 0 gives x = 1/2." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Check which factor pair gives a product of -12 and a middle term of 1." },
+                { "level": "one-line", "prompt": "Write (3x + 2)(2x - 1) = 0." },
+                { "level": "together", "prompt": "Set each factor equal to zero and solve." },
+                { "level": "different-example", "prompt": "Repeat the factorisation pattern with another leading coefficient." }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "quadratic-formula",
+          "name": "Quadratic formula",
+          "questions": [
+            {
+              "id": "quadratic-formula-easy-1",
+              "tier": "easy",
+              "question": "Solve x² − 3x − 4 = 0.",
+              "answer": "x = 4 or x = -1",
+              "method": "quadratic-formula",
+              "solutionSteps": [
+                { "step": 1, "type": "identify", "text": "Identify a = 1, b = -3, c = -4." },
+                { "step": 2, "type": "formula", "text": "Use x = (-b ± √(b² - 4ac)) / 2a." },
+                { "step": 3, "type": "calculate", "text": "This gives x = (3 ± √(9 + 16)) / 2 = (3 ± 5) / 2." },
+                { "step": 4, "type": "solve", "text": "So x = 4 or x = -1." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Write down a, b, and c before using the formula." },
+                { "level": "one-line", "prompt": "Use x = (-b ± √(b² - 4ac)) / 2a." },
+                { "level": "together", "prompt": "Work out the discriminant and then solve." },
+                { "level": "different-example", "prompt": "Try the same method on a nearby quadratic with a different c value." }
+              ]
+            },
+            {
+              "id": "quadratic-formula-easy-2",
+              "tier": "easy",
+              "question": "Solve x² + 5x + 6 = 0.",
+              "answer": "x = -2 or x = -3",
+              "method": "quadratic-formula",
+              "solutionSteps": [
+                { "step": 1, "type": "identify", "text": "Identify a = 1, b = 5, c = 6." },
+                { "step": 2, "type": "formula", "text": "Use x = (-5 ± √(25 - 24)) / 2." },
+                { "step": 3, "type": "calculate", "text": "This gives x = (-5 ± 1) / 2." },
+                { "step": 4, "type": "solve", "text": "So x = -2 or x = -3." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Identify the coefficients before you substitute." },
+                { "level": "one-line", "prompt": "Write x = (-5 ± √(25 - 24)) / 2." },
+                { "level": "together", "prompt": "Evaluate the square root and solve both values." },
+                { "level": "different-example", "prompt": "Try the same method with a different constant term." }
+              ]
+            },
+            {
+              "id": "quadratic-formula-medium-1",
+              "tier": "medium",
+              "question": "Solve 2x² + 5x − 3 = 0.",
+              "answer": "x = 1/2 or x = -3",
+              "method": "quadratic-formula",
+              "solutionSteps": [
+                { "step": 1, "type": "identify", "text": "Identify a = 2, b = 5, c = -3." },
+                { "step": 2, "type": "formula", "text": "Use x = (-5 ± √(25 + 24)) / 4." },
+                { "step": 3, "type": "calculate", "text": "This gives x = (-5 ± 7) / 4." },
+                { "step": 4, "type": "solve", "text": "So x = 1/2 or x = -3." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Write the values of a, b, and c clearly before substituting." },
+                { "level": "one-line", "prompt": "Use x = (-5 ± √(25 + 24)) / 4." },
+                { "level": "together", "prompt": "Simplify the discriminant and solve both results." },
+                { "level": "different-example", "prompt": "Repeat the same structure with another quadratic coefficient pattern." }
+              ]
+            },
+            {
+              "id": "quadratic-formula-medium-2",
+              "tier": "medium",
+              "question": "Solve 3x² − 2x − 8 = 0.",
+              "answer": "x = 2 or x = -4/3",
+              "method": "quadratic-formula",
+              "solutionSteps": [
+                { "step": 1, "type": "identify", "text": "Identify a = 3, b = -2, c = -8." },
+                { "step": 2, "type": "formula", "text": "Use x = (2 ± √(4 + 96)) / 6." },
+                { "step": 3, "type": "calculate", "text": "This gives x = (2 ± 10) / 6." },
+                { "step": 4, "type": "solve", "text": "So x = 2 or x = -4/3." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Carefully substitute a, b, and c into the formula." },
+                { "level": "one-line", "prompt": "Write x = (2 ± √(4 + 96)) / 6." },
+                { "level": "together", "prompt": "Simplify the discriminant and solve both branches." },
+                { "level": "different-example", "prompt": "Try another quadratic formula question with a similar pattern." }
+              ]
+            },
+            {
+              "id": "quadratic-formula-hard-1",
+              "tier": "hard",
+              "question": "Solve x² + 4x + 1 = 0, to 2 decimal places.",
+              "answer": "x = -0.27 or x = -3.73",
+              "method": "quadratic-formula",
+              "solutionSteps": [
+                { "step": 1, "type": "identify", "text": "Identify a = 1, b = 4, c = 1." },
+                { "step": 2, "type": "formula", "text": "Use x = (-4 ± √(16 - 4)) / 2 = (-4 ± √12) / 2." },
+                { "step": 3, "type": "calculate", "text": "This simplifies to x = -2 ± √3." },
+                { "step": 4, "type": "round", "text": "Calculate to 2 decimal places: x = -0.27 or x = -3.73." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Write a, b, and c clearly and substitute into the formula." },
+                { "level": "one-line", "prompt": "Use x = (-4 ± √12) / 2." },
+                { "level": "together", "prompt": "Simplify, then round to 2 decimal places." },
+                { "level": "different-example", "prompt": "Try another quadratic requiring a decimal answer." }
+              ]
+            },
+            {
+              "id": "quadratic-formula-hard-2",
+              "tier": "hard",
+              "question": "Solve 2x² − 6x + 1 = 0, to 2 decimal places.",
+              "answer": "x = 2.82 or x = 0.18",
+              "method": "quadratic-formula",
+              "solutionSteps": [
+                { "step": 1, "type": "identify", "text": "Identify a = 2, b = -6, c = 1." },
+                { "step": 2, "type": "formula", "text": "Use x = (6 ± √(36 - 8)) / 4 = (6 ± √28) / 4." },
+                { "step": 3, "type": "calculate", "text": "This gives x = (6 ± 2√7) / 4 = (3 ± √7) / 2." },
+                { "step": 4, "type": "round", "text": "Rounded to 2 d.p., x = 2.82 or x = 0.18." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Identify the coefficients and substitute them carefully." },
+                { "level": "one-line", "prompt": "Use x = (6 ± √28) / 4." },
+                { "level": "together", "prompt": "Simplify and then round to two decimal places." },
+                { "level": "different-example", "prompt": "Use the same formula method with another decimal-answer quadratic." }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "word-problems",
+          "name": "Word problems",
+          "questions": [
+            {
+              "id": "quadratic-word-easy-1",
+              "tier": "easy",
+              "question": "The product of two consecutive positive integers is 42. Find them.",
+              "answer": "6 and 7",
+              "method": "quadratic-word-problem",
+              "solutionSteps": [
+                { "step": 1, "type": "define", "text": "Let the integers be n and n + 1." },
+                { "step": 2, "type": "equation", "text": "Write n(n + 1) = 42." },
+                { "step": 3, "type": "expand", "text": "Expand: n² + n - 42 = 0." },
+                { "step": 4, "type": "factorise", "text": "Factorise: (n + 7)(n - 6) = 0." },
+                { "step": 5, "type": "solve", "text": "So n = 6, and the integers are 6 and 7." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Let the integers be n and n + 1." },
+                { "level": "one-line", "prompt": "Write n(n + 1) = 42." },
+                { "level": "together", "prompt": "Expand, factorise, then solve for n." },
+                { "level": "different-example", "prompt": "Try another consecutive-number problem." }
+              ]
+            },
+            {
+              "id": "quadratic-word-easy-2",
+              "tier": "easy",
+              "question": "A positive number multiplied by 5 more than itself gives 24. Find the number.",
+              "answer": "3",
+              "method": "quadratic-word-problem",
+              "solutionSteps": [
+                { "step": 1, "type": "define", "text": "Let the number be x." },
+                { "step": 2, "type": "equation", "text": "Write x(x + 5) = 24." },
+                { "step": 3, "type": "expand", "text": "Expand to x² + 5x - 24 = 0." },
+                { "step": 4, "type": "factorise", "text": "Factorise: (x + 8)(x - 3) = 0." },
+                { "step": 5, "type": "solve", "text": "Since the number is positive, x = 3." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Let the unknown number be x and write the product expression." },
+                { "level": "one-line", "prompt": "Write x(x + 5) = 24." },
+                { "level": "together", "prompt": "Expand, factorise, and choose the positive answer." },
+                { "level": "different-example", "prompt": "Use the same product structure on another number story." }
+              ]
+            },
+            {
+              "id": "quadratic-word-medium-1",
+              "tier": "medium",
+              "question": "A rectangle's length is 3 cm more than its width and its area is 40 cm². Find the dimensions.",
+              "answer": "5 cm by 8 cm",
+              "method": "quadratic-word-problem",
+              "solutionSteps": [
+                { "step": 1, "type": "define", "text": "Let width = w and length = w + 3." },
+                { "step": 2, "type": "equation", "text": "Write w(w + 3) = 40." },
+                { "step": 3, "type": "expand", "text": "Expand to w² + 3w - 40 = 0." },
+                { "step": 4, "type": "factorise", "text": "Factorise: (w + 8)(w - 5) = 0." },
+                { "step": 5, "type": "solve", "text": "So width = 5 cm and length = 8 cm." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Let the width be w and express the length as w + 3." },
+                { "level": "one-line", "prompt": "Write w(w + 3) = 40." },
+                { "level": "together", "prompt": "Expand and factorise, then reject the negative length." },
+                { "level": "different-example", "prompt": "Try another rectangle-area problem with a different area value." }
+              ]
+            },
+            {
+              "id": "quadratic-word-medium-2",
+              "tier": "medium",
+              "question": "A ball's height is h = 20t − 5t² metres after t seconds. When is it 15 m high?",
+              "answer": "t = 1 s and t = 3 s",
+              "method": "quadratic-word-problem",
+              "solutionSteps": [
+                { "step": 1, "type": "equation", "text": "Set 20t - 5t² = 15." },
+                { "step": 2, "type": "rearrange", "text": "Rearrange to 5t² - 20t + 15 = 0." },
+                { "step": 3, "type": "simplify", "text": "Divide by 5: t² - 4t + 3 = 0." },
+                { "step": 4, "type": "factorise", "text": "Factorise: (t - 1)(t - 3) = 0." },
+                { "step": 5, "type": "solve", "text": "So t = 1 s or t = 3 s." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Set the height formula equal to 15." },
+                { "level": "one-line", "prompt": "Write 20t - 5t² = 15." },
+                { "level": "together", "prompt": "Rearrange to a quadratic and factorise." },
+                { "level": "different-example", "prompt": "Try another projectile or motion question with two valid times." }
+              ]
+            },
+            {
+              "id": "quadratic-word-hard-1",
+              "tier": "hard",
+              "question": "The hypotenuse of a right-angled triangle is 13 cm. One leg is 7 cm longer than the other. Find both legs.",
+              "answer": "5 cm and 12 cm",
+              "method": "quadratic-word-problem",
+              "solutionSteps": [
+                { "step": 1, "type": "define", "text": "Let one leg be x and the other be x + 7." },
+                { "step": 2, "type": "equation", "text": "Use Pythagoras: x² + (x + 7)² = 13²." },
+                { "step": 3, "type": "expand", "text": "Expand: x² + x² + 14x + 49 = 169." },
+                { "step": 4, "type": "simplify", "text": "This gives 2x² + 14x - 120 = 0, or x² + 7x - 60 = 0." },
+                { "step": 5, "type": "factorise", "text": "Factorise: (x + 12)(x - 5) = 0, so x = 5. The legs are 5 and 12." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Let one leg be x and the other x + 7, then use Pythagoras." },
+                { "level": "one-line", "prompt": "Write x² + (x + 7)² = 13²." },
+                { "level": "together", "prompt": "Expand, simplify, and factorise to find x." },
+                { "level": "different-example", "prompt": "Try another right-triangle problem with a missing side." }
+              ]
+            },
+            {
+              "id": "quadratic-word-hard-2",
+              "tier": "hard",
+              "question": "A train travels 120 km at a steady speed. At 10 km/h faster, the trip takes 1 hour less. Find the original speed.",
+              "answer": "30 km/h",
+              "method": "quadratic-word-problem",
+              "solutionSteps": [
+                { "step": 1, "type": "define", "text": "Let the original speed be v km/h." },
+                { "step": 2, "type": "equations", "text": "Write 120/v - 120/(v + 10) = 1." },
+                { "step": 3, "type": "clear-fractions", "text": "Multiply through by v(v + 10): 120(v + 10) - 120v = v(v + 10)." },
+                { "step": 4, "type": "simplify", "text": "This gives 1200 = v² + 10v." },
+                { "step": 5, "type": "solve", "text": "So v² + 10v - 1200 = 0, which factors to (v + 40)(v - 30) = 0. The speed is 30 km/h." }
+              ],
+              "imStuckLadder": [
+                { "level": "first-step", "prompt": "Let the original speed be v and write the time difference equation." },
+                { "level": "one-line", "prompt": "Use 120/v - 120/(v + 10) = 1." },
+                { "level": "together", "prompt": "Clear denominators and solve the quadratic." },
+                { "level": "different-example", "prompt": "Use the same time-and-speed structure in a new transport story." }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "learningDesign": {
+    "stuckLadderLevels": [
+      "first-step",
+      "one-line",
+      "together",
+      "different-example"
+    ],
+    "freshQuestionRule": "Generate a new problem using the same template family but with fresh numbers, keeping the same algebraic structure.",
+    "clipUse": "Each question's solutionSteps are the source for the clip narration and the 'Solve this one together' flow.",
+    "aiUse": "Each question's imStuckLadder and alternateScenarioTemplates are the source for the real-time coach and new examples."
+  }
+}

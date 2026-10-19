@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --port=3000 --host=0.0.0.0",
+    "dev:api": "node server.js",
+    "dev:frontend": "vite --port=3000 --host=0.0.0.0",
+    "dev": "npm run dev:api & npm run dev:frontend",
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",

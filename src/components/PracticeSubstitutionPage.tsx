@@ -24,13 +24,14 @@ type PracticePageVariant =
 
 interface PracticeSubstitutionPageProps {
   onBackToTopic: () => void;
-  onOpenQuestion?: (questionId: number) => void;
+  onOpenQuestion?: (questionId: string, question?: { id?: string; prompt?: string; topic?: string; difficulty?: string; type?: string }) => void;
   onGoToOverview?: () => void;
   variant?: PracticePageVariant;
 }
 
 interface QuestionItem {
   id: number;
+  sourceQuestionId?: string;
   numberLabel: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
   status: 'solved' | 'needed_solution' | 'not_tried';
@@ -63,6 +64,7 @@ export const PracticeSubstitutionPage: React.FC<PracticeSubstitutionPageProps> =
     overrides: Partial<QuestionItem> = {},
   ): QuestionItem => ({
     id: index + 1,
+    sourceQuestionId: question.id,
     numberLabel: `Question ${index + 1}`,
     difficulty:
       question.difficulty === 'starter' ? 'Easy' : question.difficulty === 'core' ? 'Medium' : 'Hard',
@@ -557,7 +559,27 @@ export const PracticeSubstitutionPage: React.FC<PracticeSubstitutionPageProps> =
 
                             <button
                               type="button"
-                              onClick={() => onOpenQuestion && onOpenQuestion(q.id)}
+                              onClick={() => {
+                                if (!onOpenQuestion) return;
+                                onOpenQuestion(
+                                  q.sourceQuestionId ?? String(q.id),
+                                  q.sourceQuestionId
+                                    ? {
+                                        id: q.sourceQuestionId,
+                                        prompt: q.eq1 || q.wordProblemText || '',
+                                        topic: activeTab === 'word_problems' ? 'Word problems' : activeTab === 'elimination' ? 'Simultaneous equations' : 'Simultaneous equations',
+                                        difficulty: q.difficulty.toLowerCase(),
+                                        type: activeTab === 'word_problems' ? 'word-problem' : activeTab === 'elimination' ? 'simultaneous' : 'simultaneous',
+                                      }
+                                    : {
+                                        id: String(q.id),
+                                        prompt: q.eq1 || q.wordProblemText || '',
+                                        topic: activeTab === 'word_problems' ? 'Word problems' : 'Simultaneous equations',
+                                        difficulty: q.difficulty.toLowerCase(),
+                                        type: activeTab === 'word_problems' ? 'word-problem' : 'simultaneous',
+                                      },
+                                );
+                              }}
                               className={`inline-flex items-center justify-center ${isMobileFrame ? 'w-full h-[36px]' : 'h-[36px] px-[18px]'} text-[13px] font-semibold rounded-[8px] bg-white text-[#17201D] border border-[#DDD8CC] hover:bg-[#F4F1EA] transition-colors focus:outline-none cursor-pointer`}
                             >
                               Open

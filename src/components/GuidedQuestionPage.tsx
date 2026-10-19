@@ -13,7 +13,7 @@ import {
   ChevronRight,
   LifeBuoy,
 } from 'lucide-react';
-import { generateGuidedQuestionFeedback } from '../lib/scenario-generator';
+import { generateGuidedQuestionFeedback, generateScenarioVariants } from '../lib/scenario-generator';
 
 export type GuidedFrameId =
   | 'interactive'
@@ -33,6 +33,14 @@ interface GuidedQuestionPageProps {
   onNextStep?: () => void;
   onBackToClip?: () => void;
   onOpenPractice?: () => void;
+  question?: {
+    id?: string;
+    prompt?: string;
+    topic?: string;
+    difficulty?: string;
+    type?: string;
+    answer?: string;
+  };
   initialFrame?: GuidedFrameId;
 }
 
@@ -42,6 +50,7 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
   onNextStep,
   onBackToClip,
   onOpenPractice,
+  question,
   initialFrame = 'interactive',
 }) => {
   const [activeFrame, setActiveFrame] = useState<GuidedFrameId>(initialFrame);
@@ -65,8 +74,12 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
   const [isCouldNotCheckOpen, setIsCouldNotCheckOpen] = useState(false);
   const [isLessonAccordionOpenMobile, setIsLessonAccordionOpenMobile] = useState(true);
   const [isStatsAccordionOpenMobile, setIsStatsAccordionOpenMobile] = useState(true);
+  const [supportGuide, setSupportGuide] = useState<string | null>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const selectedQuestionPrompt = question?.prompt ?? 'At the school fair, 2 samosas and 1 drink cost $7. 1 samosa and 3 drinks cost $11. Let s be the price of a samosa and d the price of a drink.';
+  const selectedQuestionTopic = question?.topic ?? 'Simultaneous equations';
+  const selectedQuestionType = question?.type ?? 'simultaneous';
 
   // Frame definition metadata for the switcher dock
   const FRAME_OPTIONS: { id: GuidedFrameId; num: string; title: string; hint: string }[] = [
@@ -232,11 +245,11 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
 
     try {
       const result = await generateGuidedQuestionFeedback({
-        question: 'At the school fair, 2 samosas and 1 drink cost $7. 1 samosa and 3 drinks cost $11. Let s be the price of a samosa and d the price of a drink.',
-        given: 'd = 7 − 2s',
+        question: selectedQuestionPrompt,
+        given: selectedQuestionType === 'simultaneous' ? 'd = 7 − 2s' : 'Use the structure of the current question.',
         studentAnswer: inputValue,
         expectedStep: 's + 3(7 − 2s) = 11',
-        topic: 'Simultaneous equations',
+        topic: selectedQuestionTopic,
         teachingStyle: 'supportive',
       });
 
@@ -265,11 +278,11 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
 
     try {
       const result = await generateGuidedQuestionFeedback({
-        question: 'At the school fair, 2 samosas and 1 drink cost $7. 1 samosa and 3 drinks cost $11. Let s be the price of a samosa and d the price of a drink.',
-        given: 'd = 7 − 2s',
+        question: selectedQuestionPrompt,
+        given: selectedQuestionType === 'simultaneous' ? 'd = 7 − 2s' : 'Use the structure of the current question.',
         studentAnswer: inputValue || 's + 7 − 2s = 11',
         expectedStep: 's + 3(7 − 2s) = 11',
-        topic: 'Simultaneous equations',
+        topic: selectedQuestionTopic,
         teachingStyle: 'slow',
       });
       setAiFeedback(result);
@@ -277,6 +290,92 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
     } catch (error) {
       console.warn('Unable to generate hint:', error);
       setActiveFrame('4_hint_2');
+    }
+  };
+
+  const handleStuckSupport = async (type: 'first-step' | 'one-line' | 'together' | 'different-example') => {
+    setIsStuckCardOpen(false);
+    setSupportGuide(type);
+
+    if (type === 'first-step') {
+      setInputValue('s + 3(7 − 2s) = 11');
+      setAiFeedback({
+        status: 'mistake',
+        whatWorked: 'You already identified the substitution correctly and wrote the equation in the right structure.',
+        whatToWorkOn: 'Now expand the bracket and simplify the left-hand side before solving.',
+        nextStep: 'Start with the bracket: 3(7 − 2s) = 21 − 6s.',
+        hint: 'The first line should be: s + 3(7 − 2s) = 11',
+      });
+      setFeedbackType('mistake');
+      setIsFeedbackOpen(true);
+      setActiveFrame('1_typing');
+      return;
+    }
+
+    if (type === 'one-line') {
+      setInputValue('s + 21 − 6s = 11');
+      setAiFeedback({
+        status: 'mistake',
+        whatWorked: 'Great. You have expanded the bracket correctly and are ready to collect the like terms.',
+        whatToWorkOn: 'Now combine s with −6s and solve the simple linear equation.',
+        nextStep: 'Combine the s terms: s − 6s = −5s, so −5s + 21 = 11.',
+        hint: 'The next line is: s + 21 − 6s = 11',
+      });
+      setFeedbackType('mistake');
+      setIsFeedbackOpen(true);
+      setActiveFrame('1_typing');
+      return;
+    }
+
+    if (type === 'together') {
+      setAiFeedback({
+        status: 'mistake',
+        whatWorked: 'You have the right substitution idea; the next step is just to simplify and solve.',
+        whatToWorkOn: 'Let’s work through the expansion and equation solving together with the lesson clip.',
+        nextStep: 'Watch the short clip and then complete the same steps on your own.',
+        hint: 'Follow the same movement: substitute → expand → collect like terms → solve.',
+      });
+      setFeedbackType('mistake');
+      setIsFeedbackOpen(true);
+      onBackToClip?.();
+      return;
+    }
+
+    try {
+      const variants = await generateScenarioVariants({
+        question: selectedQuestionPrompt,
+        answer: question?.answer ?? 's = 2, d = 3',
+        topic: selectedQuestionTopic,
+        difficulty: selectedQuestionType === 'quadratic' ? 'core' : 'starter',
+        teachingStyle: 'clear and practical',
+      });
+
+      const variant = variants[0];
+      setInputValue('');
+      setAiFeedback({
+        status: 'mistake',
+        whatWorked: 'This is a different example using the same substitution pattern.',
+        whatToWorkOn: variant ? `${variant.title}: ${variant.context}` : 'Use the same structure with a fresh story problem.',
+        nextStep: variant && variant.equationText.length > 0
+          ? `Try this pair of equations: ${variant.equationText.join(' and ')}.`
+          : 'Write the variables, substitute one equation into the other, then simplify.',
+        hint: variant ? `A quick example is ${variant.equationText.join(' and ')}.` : 'Substitute one variable into the other equation before solving.',
+      });
+      setFeedbackType('mistake');
+      setIsFeedbackOpen(true);
+      setActiveFrame('1_typing');
+    } catch (error) {
+      console.warn('Unable to generate an alternate example:', error);
+      setAiFeedback({
+        status: 'mistake',
+        whatWorked: 'The method is the same even when the story changes.',
+        whatToWorkOn: 'Try a new situation: one item costs 3 dollars and another costs 2 dollars, with a total of 11 dollars.',
+        nextStep: 'Write two equations, substitute, and simplify.',
+        hint: 'Use the same substitution idea in a fresh word problem.',
+      });
+      setFeedbackType('mistake');
+      setIsFeedbackOpen(true);
+      setActiveFrame('1_typing');
     }
   };
 
@@ -321,10 +420,10 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
         {/* Center: Lesson Identity */}
         <div className="flex flex-col items-center justify-center text-center px-4">
           <h1 className="font-serif text-lg leading-tight font-semibold text-[#141d1a]">
-            Substitution
+            {selectedQuestionType === 'word-problem' ? 'Word problem' : selectedQuestionType === 'quadratic' ? 'Quadratic' : 'Substitution'}
           </h1>
           <span className="text-xs text-[#3f4945]">
-            Simultaneous equations
+            {selectedQuestionTopic}
           </span>
         </div>
 
@@ -837,13 +936,9 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
                     </h3>
 
                     <div className="flex flex-col gap-2">
-                      {/* Option 1 */}
                       <button
                         type="button"
-                        onClick={() => {
-                          setInputValue('s + 3(7 − 2s) = 11');
-                          setActiveFrame('1_typing');
-                        }}
+                        onClick={() => void handleStuckSupport('first-step')}
                         className="w-full text-left p-3.5 rounded-lg border border-[#DDD8CC] hover:border-[#004135] bg-[#FAF8F4] hover:bg-white transition-all flex items-center justify-between group cursor-pointer"
                       >
                         <div>
@@ -857,10 +952,25 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
                         <ChevronRight className="w-4 h-4 text-[#7D8883] group-hover:text-[#004135] group-hover:translate-x-0.5 transition-all" />
                       </button>
 
-                      {/* Option 2 */}
                       <button
                         type="button"
-                        onClick={onBackToClip}
+                        onClick={() => void handleStuckSupport('one-line')}
+                        className="w-full text-left p-3.5 rounded-lg border border-[#DDD8CC] hover:border-[#004135] bg-[#FAF8F4] hover:bg-white transition-all flex items-center justify-between group cursor-pointer"
+                      >
+                        <div>
+                          <div className="text-sm font-semibold text-[#141d1a] group-hover:text-[#004135]">
+                            We show one line and you finish it
+                          </div>
+                          <div className="text-xs text-[#3f4945] mt-0.5">
+                            The next step is given, and you complete the rest.
+                          </div>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-[#7D8883] group-hover:text-[#004135] group-hover:translate-x-0.5 transition-all" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => void handleStuckSupport('together')}
                         className="w-full text-left p-3.5 rounded-lg border border-[#DDD8CC] hover:border-[#004135] bg-[#FAF8F4] hover:bg-white transition-all flex items-center justify-between group cursor-pointer"
                       >
                         <div>
@@ -868,7 +978,23 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
                             Solve this one together
                           </div>
                           <div className="text-xs text-[#3f4945] mt-0.5">
-                            We work through it with a short clip, then give you a similar question to try.
+                            We work through it with a short clip and then try a similar question.
+                          </div>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-[#7D8883] group-hover:text-[#004135] group-hover:translate-x-0.5 transition-all" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => void handleStuckSupport('different-example')}
+                        className="w-full text-left p-3.5 rounded-lg border border-[#DDD8CC] hover:border-[#004135] bg-[#FAF8F4] hover:bg-white transition-all flex items-center justify-between group cursor-pointer"
+                      >
+                        <div>
+                          <div className="text-sm font-semibold text-[#141d1a] group-hover:text-[#004135]">
+                            Use a different example
+                          </div>
+                          <div className="text-xs text-[#3f4945] mt-0.5">
+                            We show the same method in a new real-world context.
                           </div>
                         </div>
                         <ChevronRight className="w-4 h-4 text-[#7D8883] group-hover:text-[#004135] group-hover:translate-x-0.5 transition-all" />

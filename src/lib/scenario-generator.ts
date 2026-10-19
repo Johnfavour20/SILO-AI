@@ -236,48 +236,22 @@ function extractGeneratedText(payload: unknown): string {
 export async function generateGuidedQuestionFeedback(
   input: GuidedQuestionInteractionInput,
 ): Promise<GuidedQuestionInteractionResponse> {
-  const apiKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_HUGGINGFACE_API_KEY)
-    ? import.meta.env.VITE_HUGGINGFACE_API_KEY
-    : undefined;
-
   const fallback = evaluateSubstitutionAnswer(input.studentAnswer);
 
-  if (!apiKey) {
-    return fallback;
-  }
-
-  const modelId = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_HUGGINGFACE_MODEL)
-    ? import.meta.env.VITE_HUGGINGFACE_MODEL
-    : 'mistralai/Mistral-7B-Instruct-v0.2';
-
-  const prompt = buildGuidedQuestionPrompt(input);
-
   try {
-    const response = await fetch(`https://api-inference.huggingface.co/models/${modelId}`, {
+    const response = await fetch('/api/guided-feedback', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({
-        inputs: prompt,
-        parameters: {
-          max_new_tokens: 250,
-          temperature: 0.3,
-          return_full_text: false,
-        },
-      }),
+      body: JSON.stringify(input),
     });
 
     if (!response.ok) {
-      throw new Error(`Hugging Face request failed: ${response.status}`);
+      throw new Error(`Backend feedback request failed: ${response.status}`);
     }
 
-    const payload = await response.json();
-    const text = extractGeneratedText(payload).trim();
-    const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
-    const parsed = JSON.parse(cleaned) as Partial<GuidedQuestionInteractionResponse>;
-
+    const parsed = (await response.json()) as Partial<GuidedQuestionInteractionResponse>;
     if (parsed && typeof parsed.status === 'string' && (parsed.status === 'correct' || parsed.status === 'mistake')) {
       return {
         status: parsed.status,
@@ -288,61 +262,33 @@ export async function generateGuidedQuestionFeedback(
       };
     }
   } catch (error) {
-    console.warn('Falling back to safe guided-question feedback because Hugging Face generation failed:', error);
+    console.warn('Falling back to safe guided-question feedback because the backend request failed:', error);
   }
 
   return fallback;
 }
 
 export async function generateScenarioVariants(input: ScenarioGenerationInput): Promise<ScenarioVariant[]> {
-  const apiKey = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_HUGGINGFACE_API_KEY)
-    ? import.meta.env.VITE_HUGGINGFACE_API_KEY
-    : undefined;
-
-  if (!apiKey) {
-    return getDefaultScenarioVariants(input.question, input.answer);
-  }
-
-  const modelId = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_HUGGINGFACE_MODEL)
-    ? import.meta.env.VITE_HUGGINGFACE_MODEL
-    : 'mistralai/Mistral-7B-Instruct-v0.2';
-
-  const prompt = buildScenarioPrompt(input);
-
   try {
-    const response = await fetch(`https://api-inference.huggingface.co/models/${modelId}`, {
+    const response = await fetch('/api/scenario-variants', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({
-        inputs: prompt,
-        parameters: {
-          max_new_tokens: 500,
-          temperature: 0.7,
-          return_full_text: false,
-        },
-      }),
+      body: JSON.stringify(input),
     });
 
     if (!response.ok) {
-      throw new Error(`Hugging Face request failed: ${response.status}`);
+      throw new Error(`Backend scenario request failed: ${response.status}`);
     }
 
-    const payload = await response.json();
-    const text = extractGeneratedText(payload).trim();
-    const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
-    const parsed = JSON.parse(cleaned);
-    const normalised = normaliseScenarioArray(parsed);
-
-    if (normalised && normalised.length > 0) {
-      return normalised;
+    const parsed = (await response.json()) as ScenarioVariant[];
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed;
     }
-
-    return getDefaultScenarioVariants(input.question, input.answer);
   } catch (error) {
-    console.warn('Falling back to default scenario variants because Hugging Face generation failed:', error);
-    return getDefaultScenarioVariants(input.question, input.answer);
+    console.warn('Falling back to default scenario variants because the backend request failed:', error);
   }
+
+  return getDefaultScenarioVariants(input.question, input.answer);
 }
