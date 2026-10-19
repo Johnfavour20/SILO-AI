@@ -99,31 +99,62 @@ Rules:
 export function evaluateSubstitutionAnswer(studentAnswer: string): GuidedQuestionInteractionResponse {
   const normalised = studentAnswer.toLowerCase().replace(/\s+/g, '');
 
-  const isCorrect =
+  const hasSubstitutionPattern =
     normalised.includes('s+3(7-2s)=11') ||
     normalised.includes('s+3(7−2s)=11') ||
     normalised.includes('s+21-6s=11') ||
     normalised.includes('s+21−6s=11') ||
-    normalised.includes('s+3(7-2s)=11') ||
-    normalised.includes('s+3(7-2s)=11');
+    normalised.includes('x+3(7-2x)=11') ||
+    normalised.includes('x+3(7−2x)=11') ||
+    normalised.includes('x+21-6x=11') ||
+    normalised.includes('x+21−6x=11');
 
-  if (isCorrect) {
+  const hasExpandedCorrectly =
+    normalised.includes('s+21-6s=11') ||
+    normalised.includes('s+21−6s=11') ||
+    normalised.includes('x+21-6x=11') ||
+    normalised.includes('x+21−6x=11');
+
+  if (hasCorrectForm(normalised)) {
     return {
       status: 'correct',
-      whatWorked: 'You replaced d with 7 − 2s and kept the equation balanced.',
-      whatToWorkOn: 'You have the right substitution structure; now simplify the bracket and collect like terms.',
-      nextStep: 'Now expand 3(7 − 2s) to 21 − 6s, then solve for s.',
-      hint: 'Use the distributive law: 3(7 − 2s) = 21 − 6s.',
+      whatWorked: 'Step 1: expand correctly. Step 2: collect like terms. Step 3: solve for x. Step 4: check by substitution.',
+      whatToWorkOn: 'Step 2: collect like terms. Step 3: solve for x. Step 4: check by substitution back into the original equation.',
+      nextStep: 'Step 1: expand correctly. Step 2: collect like terms. Step 3: solve for x. Step 4: check by substitution.',
+      hint: 'Use the distributive law: 3(7 − 2s) = 21 − 6s (or 3(7 − 2x) = 21 − 6x). Then collect like terms, solve for x, and check by substitution back into the original equation.',
+    };
+  }
+
+  if (hasExpandedCorrectly || hasSubstitutionPattern) {
+    return {
+      status: 'correct',
+      whatWorked: 'Good substitution. Next, follow the coach steps: expand correctly, collect like terms, solve for x, then check by substitution.',
+      whatToWorkOn: 'Step 2: collect like terms. Step 3: solve for x. Step 4: check by substitution back into the original equation.',
+      nextStep: 'Step 1: expand correctly. Step 2: collect like terms. Step 3: solve for x. Step 4: check by substitution.',
+      hint: 'If your line is x + 21 − 6x = 11, combine x and −6x to get −5x, then solve for x and check by substitution back into the original equation.',
     };
   }
 
   return {
     status: 'mistake',
-    whatWorked: 'You correctly substituted d = 7 − 2s into the second equation.',
-    whatToWorkOn: 'The 3 must multiply every term inside the brackets, so 3(7 − 2s) becomes 21 − 6s, not 7 − 2s.',
-    nextStep: 'Rewrite the equation as s + 3(7 − 2s) = 11 and then expand the bracket before collecting s terms.',
-    hint: 'Multiply the 3 by both 7 and 2s. Remember: 3 × 7 = 21 and 3 × 2s = 6s.',
+    whatWorked: 'The substitution is the right idea, but you still need to follow the lesson coach steps.',
+    whatToWorkOn: 'Step 1: expand correctly. Step 2: collect like terms. Step 3: solve for x. Step 4: check by substitution.',
+    nextStep: 'Rewrite the equation as x + 3(7 − 2x) = 11, then follow the coach steps: expand correctly, collect like terms, solve for x, and check by substitution.',
+    hint: 'Multiply the 3 by both 7 and 2s (or 2x). Remember: 3 × 7 = 21 and 3 × 2s = 6s. Then collect like terms, solve for x, and check by substitution back into the original equation.',
   };
+}
+
+function hasCorrectForm(normalised: string): boolean {
+  return [
+    's+3(7-2s)=11',
+    's+3(7−2s)=11',
+    'x+3(7-2x)=11',
+    'x+3(7−2x)=11',
+    's+21-6s=11',
+    's+21−6s=11',
+    'x+21-6x=11',
+    'x+21−6x=11',
+  ].some((pattern) => normalised.includes(pattern));
 }
 
 function getDefaultScenarioVariants(question: string, answer: string): ScenarioVariant[] {
@@ -236,7 +267,7 @@ function extractGeneratedText(payload: unknown): string {
 export async function generateGuidedQuestionFeedback(
   input: GuidedQuestionInteractionInput,
 ): Promise<GuidedQuestionInteractionResponse> {
-  const fallback = evaluateSubstitutionAnswer(input.studentAnswer);
+  const localFeedback = evaluateSubstitutionAnswer(input.studentAnswer);
 
   try {
     const response = await fetch('/api/guided-feedback', {
@@ -247,25 +278,24 @@ export async function generateGuidedQuestionFeedback(
       body: JSON.stringify(input),
     });
 
-    if (!response.ok) {
-      throw new Error(`Backend feedback request failed: ${response.status}`);
-    }
-
-    const parsed = (await response.json()) as Partial<GuidedQuestionInteractionResponse>;
-    if (parsed && typeof parsed.status === 'string' && (parsed.status === 'correct' || parsed.status === 'mistake')) {
-      return {
-        status: parsed.status,
-        whatWorked: typeof parsed.whatWorked === 'string' ? parsed.whatWorked : fallback.whatWorked,
-        whatToWorkOn: typeof parsed.whatToWorkOn === 'string' ? parsed.whatToWorkOn : fallback.whatToWorkOn,
-        nextStep: typeof parsed.nextStep === 'string' ? parsed.nextStep : fallback.nextStep,
-        hint: typeof parsed.hint === 'string' ? parsed.hint : fallback.hint,
-      };
+    if (response.ok) {
+      const parsed = (await response.json()) as Partial<GuidedQuestionInteractionResponse>;
+      if (parsed && typeof parsed.status === 'string' && (parsed.status === 'correct' || parsed.status === 'mistake')) {
+        return {
+          status: parsed.status,
+          whatWorked: typeof parsed.whatWorked === 'string' ? parsed.whatWorked : localFeedback.whatWorked,
+          whatToWorkOn: typeof parsed.whatToWorkOn === 'string' ? parsed.whatToWorkOn : localFeedback.whatToWorkOn,
+          nextStep: typeof parsed.nextStep === 'string' ? parsed.nextStep : localFeedback.nextStep,
+          hint: typeof parsed.hint === 'string' ? parsed.hint : localFeedback.hint,
+        };
+      }
     }
   } catch (error) {
-    console.warn('Falling back to safe guided-question feedback because the backend request failed:', error);
+    console.warn('Using local guided-question feedback because the backend request failed:', error);
+    return localFeedback;
   }
 
-  return fallback;
+  return localFeedback;
 }
 
 export async function generateScenarioVariants(input: ScenarioGenerationInput): Promise<ScenarioVariant[]> {

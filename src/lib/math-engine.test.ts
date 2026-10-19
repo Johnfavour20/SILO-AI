@@ -5,6 +5,7 @@ import { solveLinearSystem, solveQuadraticExact, createFraction, addFractions, s
 import { buildLessonTemplateFromQuestion, getQuestionsByType } from './lesson-templates.ts';
 import { buildClipStoryboard, getStoryboardById } from './clip-storyboard.ts';
 import { evaluateSubstitutionAnswer } from './scenario-generator.ts';
+import { resolveLessonToQuestionId } from './lesson-routing.ts';
 import { LessonClipPlayerPage } from '../components/LessonClipPlayerPage';
 
 describe('fraction arithmetic', () => {
@@ -149,6 +150,22 @@ describe('lesson templates', () => {
     expect(feedback.status).toBe('correct');
     expect(feedback.hint).toContain('3(7');
     expect(feedback.hint).toContain('2s');
+  });
+
+  it('routes quadratic lesson ids to their correct question ids', () => {
+    expect(resolveLessonToQuestionId('quad-2')).toBe('quadratic-2');
+    expect(resolveLessonToQuestionId('quadratic-2')).toBe('quadratic-2');
+    expect(resolveLessonToQuestionId('sim-2')).toBe('simultaneous-2');
+  });
+
+  it('gives step-specific quadratic substitution feedback', () => {
+    const feedback = evaluateSubstitutionAnswer('x + 3(7 - 2x) = 11');
+
+    expect(feedback.status).toBe('correct');
+    expect(feedback.whatWorked.toLowerCase()).toContain('expand correctly');
+    expect(feedback.whatToWorkOn.toLowerCase()).toContain('collect like terms');
+    expect(feedback.nextStep.toLowerCase()).toContain('solve for x');
+    expect(feedback.hint.toLowerCase()).toContain('check by substitution');
   });
 
   it('builds a Hugging Face prompt and falls back safely without an API key', async () => {

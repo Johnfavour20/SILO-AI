@@ -1,4 +1,5 @@
 import React from 'react';
+import heroImage from '../assets/images/pexels-silverkblack-39190799.jpg';
 
 interface HeroSectionProps {
   onStartSession: () => void;
@@ -78,8 +79,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <img
               alt="High school student studying intently with notebook and laptop at a wooden table"
               className="rounded-xl border border-[#DDD8CC] object-cover w-full h-[420px] bg-[#EDE9E0]"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9uXFNehvtpWEI091MWoVj9bUC54QqCogh1pPjDxoX_pCoXlmPL_TpXOi1iFCcPLsHjp3YXHL6iZYRv8Qsv0vDFRR9pgAICPWl6tQTK_gCtC1BirEhe0K6VIbEEPDExPMCYsYFXh2RBWBUGZx4aNeN-_LZ6TWOp-hl9sDFy1NgOMwftGKw1UDvlHDwd9ZtSGtK97kMg-bX_6R_Qswwxz1sCcOGvkGu253pkYwZCnRVoWia-vIukhQQ"
-              referrerPolicy="no-referrer"
+              src={heroImage}
             />
 
             {/* Upper Right Floating Card */}

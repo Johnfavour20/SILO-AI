@@ -4,6 +4,7 @@ import {
   Check,
   Play,
 } from 'lucide-react';
+import { resolveLessonToQuestionId } from '../lib/lesson-routing.ts';
 
 interface TopicPageProps {
   onBackToDashboard: () => void;
@@ -98,6 +99,7 @@ export const TopicPage: React.FC<TopicPageProps> = ({
   ];
 
   const activeLessons = selectedTopic === 'simultaneous' ? simultaneousLessons : quadraticLessons;
+  const resolveLessonId = (lessonId: string) => resolveLessonToQuestionId(lessonId);
 
   return (
     <div className="min-h-screen bg-[#FAF8F4] text-[#17201D] font-sans flex flex-col">
@@ -209,7 +211,7 @@ export const TopicPage: React.FC<TopicPageProps> = ({
                 return (
                   <div
                     key={lesson.id}
-                    onClick={() => onSelectLesson(lesson.id)}
+                    onClick={() => onSelectLesson(resolveLessonId(lesson.id))}
                     className={`relative px-4 py-3.5 rounded-[8px] transition-colors cursor-pointer hover:bg-[#F4F1EA]/70 ${
                       isCurrent ? 'bg-[#DCEBE6] hover:bg-[#DCEBE6]' : ''
                     }`}
@@ -377,7 +379,7 @@ export const TopicPage: React.FC<TopicPageProps> = ({
                 type="button"
                 onClick={() =>
                   onSelectLesson(
-                    selectedTopic === 'simultaneous' ? 'simultaneous-lunch' : 'fundraiser-stall'
+                    selectedTopic === 'simultaneous' ? 'simultaneous-2' : 'quadratic-2'
                   )
                 }
                 className="w-full py-2.5 bg-[#0E5A4B] hover:bg-[#0A4337] text-white rounded-[8px] text-[14px] font-medium flex items-center justify-center gap-2 transition-colors cursor-pointer"

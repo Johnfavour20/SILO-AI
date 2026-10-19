@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import secondLandingImage from '../assets/images/pexels-silverkblack-39191019.jpg';
 
 export const BenefitsSection: React.FC = () => {
   const [hintIndex, setHintIndex] = useState(0);
@@ -21,8 +22,7 @@ export const BenefitsSection: React.FC = () => {
           <img
             alt="High school students collaborating and working through mathematics textbook exercises"
             className="rounded-xl border border-[#DDD8CC] object-cover w-full h-[380px] bg-[#EDE9E0]"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuCKVRC9b_8SShh-vmzapOFm8_dwMzTOjRvcIx89irho1x7BtmdMfWSPhT447M-gQIcG9ItgKzkQYFuEIHhJZH5g0g9kQAdmnttyPPidAQQ1tblHoxEoq-Unn__XJgW3qgXwSoWj5RxrjCLDUra8nWBANRnQr7HjTKinqAl1Dv1F8Zdhteguc-6npurbvOill89gapLudQpZMycgnaYckVSHS_hVzHA1t8awoUdqSs9ey6y4Fz-fVt"
-            referrerPolicy="no-referrer"
+            src={secondLandingImage}
           />
           <button
             onClick={nextHint}

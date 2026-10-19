@@ -29,6 +29,7 @@ import { HistoryPage } from './components/HistoryPage.tsx';
 import { TopicPickerModal } from './components/TopicPickerModal.tsx';
 import { ReportModal } from './components/ReportModal.tsx';
 import { questionBank } from './data/questionBank.ts';
+import { resolveLessonToQuestionId } from './lib/lesson-routing.ts';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<
@@ -57,6 +58,14 @@ export default function App() {
 
   const selectedQuestion =
     questionBank.find((item) => item.id === selectedQuestionId) ?? questionBank[0];
+
+  const handleLessonSelection = (lessonId: string) => {
+    const matchingQuestionId = resolveLessonToQuestionId(lessonId);
+    setSelectedLessonId(lessonId);
+    setSelectedQuestionId(matchingQuestionId);
+    setCurrentPage('lesson-clip');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -328,9 +337,7 @@ export default function App() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           onSelectLesson={(id) => {
-            setCurrentPage('lesson-clip');
-            setSelectedLessonId(id);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            handleLessonSelection(id);
           }}
           onOpenPractice={() => {
             setCurrentPage('practice-substitution');
@@ -491,6 +498,7 @@ export default function App() {
           onOpenQuestion={(questionId) => {
             const matchingQuestion =
               questionBank.find((item) => item.id === questionId) ?? questionBank[0];
+            setSelectedLessonId(questionId);
             setSelectedQuestionId(matchingQuestion.id);
             showToast(`Opening ${matchingQuestion.topic}: ${matchingQuestion.prompt}`);
             setCurrentPage('guided-question');

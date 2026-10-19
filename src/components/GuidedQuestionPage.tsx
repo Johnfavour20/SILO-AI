@@ -401,6 +401,15 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
       ? '1 of 3'
       : '0 of 3';
 
+  const getCoachStepList = (text?: string): string[] => {
+    if (!text) return [];
+
+    const matches = [...text.matchAll(/Step\s*(\d+)\s*:\s*([^.;]+)(?:[.;]|$)/gi)];
+    if (matches.length === 0) return [];
+
+    return matches.map((match) => `Step ${match[1]}: ${match[2].trim()}`);
+  };
+
   // Desktop Header
   const renderHeader = () => (
     <header className="w-full bg-white border-b border-[#DDD8CC] sticky top-0 z-20">
@@ -694,18 +703,26 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
             <div className="flex flex-col gap-2 pt-1">
               <button
                 type="button"
-                className="w-full h-11 rounded-lg bg-[#004135] text-white text-sm font-medium hover:bg-[#0A4A3E] transition-colors"
+                disabled={inputValue.trim().length === 0}
+                onClick={() => void handleCheckAnswer()}
+                className={`w-full h-11 rounded-lg text-white text-sm font-medium transition-colors ${
+                  inputValue.trim().length === 0
+                    ? 'bg-[#004135] opacity-50 cursor-not-allowed'
+                    : 'bg-[#004135] hover:bg-[#0A4A3E]'
+                }`}
               >
                 Check answer
               </button>
               <button
                 type="button"
+                onClick={() => void handleHintRequest()}
                 className="w-full h-11 rounded-lg border border-[#DDD8CC] bg-white text-[#141d1a] text-sm font-medium hover:bg-[#F4F1EA] transition-colors"
               >
                 Get a hint
               </button>
               <button
                 type="button"
+                onClick={() => setActiveFrame('6_still_stuck')}
                 className="w-full py-2 text-center text-xs text-[#004135] font-medium hover:underline"
               >
                 I'm stuck
@@ -1128,7 +1145,7 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
                       <button
                         type="button"
                         disabled={inputValue.trim().length === 0}
-                        onClick={handleCheckAnswer}
+                        onClick={() => void handleCheckAnswer()}
                         className={`h-11 px-5 rounded-lg text-sm font-medium transition-all select-none min-w-[130px] ${
                           inputValue.trim().length > 0
                             ? 'bg-[#004135] hover:bg-[#0A4A3E] text-white cursor-pointer hover:-translate-y-0.5 shadow-xs'
@@ -1203,11 +1220,25 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
                       {/* Block 3: Try this next (sunken, arrow icon) */}
                       <div className="p-3.5 rounded-lg bg-[#F4F1EA] border border-[#DDD8CC] flex items-start gap-3">
                         <ArrowRight className="w-5 h-5 text-[#004135] shrink-0 mt-0.5" />
-                        <div className="text-sm text-[#141d1a] leading-relaxed">
-                          <strong className="block text-[#141d1a] font-semibold mb-0.5">
+                        <div className="text-sm text-[#141d1a] leading-relaxed w-full">
+                          <strong className="block text-[#141d1a] font-semibold mb-2">
                             Try this next
                           </strong>
-                          {aiFeedback?.nextStep ?? 'Rewrite the line with the 3 applied to both terms, then collect the s terms.'}
+                          {(() => {
+                            const stepList = getCoachStepList(aiFeedback?.nextStep ?? 'Step 1: expand correctly. Step 2: collect like terms. Step 3: solve for x. Step 4: check by substitution.');
+                            if (stepList.length > 0) {
+                              return (
+                                <ol className="list-decimal pl-5 space-y-1.5 text-left">
+                                  {stepList.map((step) => (
+                                    <li key={step} className="text-[#141d1a] leading-relaxed">
+                                      {step}
+                                    </li>
+                                  ))}
+                                </ol>
+                              );
+                            }
+                            return <span>{aiFeedback?.nextStep ?? 'Rewrite the line with the 3 applied to both terms, then collect the s terms.'}</span>;
+                          })()}
                         </div>
                       </div>
                     </div>
