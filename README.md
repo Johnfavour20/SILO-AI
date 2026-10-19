@@ -195,10 +195,13 @@ Then add them in markdown like:
 Below is the recommended contribution breakdown for the project. Update names and responsibilities before submission.
 
 ### Team Lead / Product Direction
+
+Molonia Favour 
 - Defines the product concept, learning journey, and learning-coach design
 - Aligns the experience with the competition brief and user needs
 
 ### Frontend Engineer
+Igboeche Johnfavour Ikenna 
 - Builds the React + TypeScript interface
 - Implements the lesson flow, navigation, and UI states
 - Ensures the design matches the Silo design language
@@ -237,6 +240,8 @@ A typical product demo can follow this path:
 
 Silo is a focused educational product for secondary mathematics learners that combines realistic problem-solving, structured feedback, and guided practice. The current repository demonstrates the product vision and lesson flow, and it is positioned to scale into a full AI-assisted learning system using the Gemini API and a rubric-based evaluation model.
 
----
+screenshot link
 
-This README was prepared to support a competition submission and can be refined with final team names, screenshots, and exact deployment details before submission.
+https://drive.google.com/drive/folders/1aT7rGr43qHQY-pBs9VBEhjZt0F-mN_Fg
+
+
