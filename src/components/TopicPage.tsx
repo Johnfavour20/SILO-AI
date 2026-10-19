@@ -8,6 +8,7 @@ import {
 interface TopicPageProps {
   onBackToDashboard: () => void;
   onSelectLesson: (scenarioId: string) => void;
+  onOpenPractice?: () => void;
 }
 
 interface LessonItem {
@@ -22,6 +23,7 @@ interface LessonItem {
 export const TopicPage: React.FC<TopicPageProps> = ({
   onBackToDashboard,
   onSelectLesson,
+  onOpenPractice,
 }) => {
   const [selectedTopic, setSelectedTopic] = useState<'simultaneous' | 'quadratic'>('simultaneous');
 
@@ -386,11 +388,15 @@ export const TopicPage: React.FC<TopicPageProps> = ({
 
               <button
                 type="button"
-                onClick={() =>
-                  onSelectLesson(
-                    selectedTopic === 'simultaneous' ? 'community-bakery' : 'fundraiser-stall'
-                  )
-                }
+                onClick={() => {
+                  if (onOpenPractice) {
+                    onOpenPractice();
+                  } else {
+                    onSelectLesson(
+                      selectedTopic === 'simultaneous' ? 'community-bakery' : 'fundraiser-stall'
+                    );
+                  }
+                }}
                 className="w-full text-center text-[14px] text-[#0E5A4B] hover:underline font-medium cursor-pointer py-1"
               >
                 Practice questions for this topic

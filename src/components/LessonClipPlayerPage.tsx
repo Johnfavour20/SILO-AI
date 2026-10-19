@@ -919,6 +919,18 @@ export const LessonClipPlayerPage: React.FC<LessonClipPlayerPageProps> = ({
               </button>
             );
           })}
+
+          {onNextStep && (
+            <button
+              type="button"
+              onClick={onNextStep}
+              className="whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#DCEBE6] hover:bg-[#c3e3d9] text-[#0E5A4B] border border-[#0E5A4B]/30 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+              title="Proceed to Step 3: Guided question"
+            >
+              <span>Step 3: Guided question</span>
+              <ChevronRight className="w-3.5 h-3.5 stroke-[2.5]" />
+            </button>
+          )}
         </div>
       </aside>
     );

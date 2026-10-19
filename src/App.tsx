@@ -22,6 +22,8 @@ import { OnboardingProfilePage } from './components/OnboardingProfilePage.tsx';
 import { DashboardPage } from './components/DashboardPage.tsx';
 import { TopicPage } from './components/TopicPage.tsx';
 import { LessonClipPlayerPage } from './components/LessonClipPlayerPage.tsx';
+import { GuidedQuestionPage } from './components/GuidedQuestionPage.tsx';
+import { PracticeSubstitutionPage } from './components/PracticeSubstitutionPage.tsx';
 import { TopicPickerModal } from './components/TopicPickerModal.tsx';
 import { ReportModal } from './components/ReportModal.tsx';
 
@@ -38,6 +40,8 @@ export default function App() {
     | 'dashboard'
     | 'topic-page'
     | 'lesson-clip'
+    | 'guided-question'
+    | 'practice-substitution'
   >('home');
   const [isTopicModalOpen, setIsTopicModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -314,6 +318,10 @@ export default function App() {
             setCurrentPage('lesson-clip');
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
+          onOpenPractice={() => {
+            setCurrentPage('practice-substitution');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
         />
       </>
     );
@@ -338,7 +346,47 @@ export default function App() {
           }}
           onOpenReport={() => setIsReportModalOpen(true)}
           onNextStep={() => {
-            showToast('Step 2 completed! Ready for guided questions in Step 3.');
+            showToast('Advancing to Step 3: Guided question');
+            setCurrentPage('guided-question');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+        />
+        <ReportModal
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+        />
+      </>
+    );
+  }
+
+  // Standalone Screen: Step 3 Guided Question (Substitution)
+  if (currentPage === 'guided-question') {
+    return (
+      <>
+        {toastMessage && (
+          <div className="fixed bottom-6 right-6 z-50 bg-[#17201D] text-white text-xs px-4 py-2.5 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in">
+            <span className="material-symbols-outlined text-[16px] text-[#1E6B3A]">
+              check_circle
+            </span>
+            <span>{toastMessage}</span>
+          </div>
+        )}
+        <GuidedQuestionPage
+          onExit={() => {
+            setCurrentPage('topic-page');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onBackToClip={() => {
+            setCurrentPage('lesson-clip');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onOpenPractice={() => {
+            setCurrentPage('practice-substitution');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onOpenReport={() => setIsReportModalOpen(true)}
+          onNextStep={() => {
+            showToast('Step 3 completed! Ready for Step 4 (Your turn).');
             setCurrentPage('topic-page');
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
@@ -346,6 +394,37 @@ export default function App() {
         <ReportModal
           isOpen={isReportModalOpen}
           onClose={() => setIsReportModalOpen(false)}
+        />
+      </>
+    );
+  }
+
+  // Standalone Screen: Practice: Substitution
+  if (currentPage === 'practice-substitution') {
+    return (
+      <>
+        {toastMessage && (
+          <div className="fixed bottom-6 right-6 z-50 bg-[#17201D] text-white text-xs px-4 py-2.5 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in">
+            <span className="material-symbols-outlined text-[16px] text-[#1E6B3A]">
+              check_circle
+            </span>
+            <span>{toastMessage}</span>
+          </div>
+        )}
+        <PracticeSubstitutionPage
+          onBackToTopic={() => {
+            setCurrentPage('topic-page');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onGoToOverview={() => {
+            setCurrentPage('topic-page');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onOpenQuestion={(qId) => {
+            showToast(`Opening Question ${qId} in solver`);
+            setCurrentPage('guided-question');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
         />
       </>
     );
