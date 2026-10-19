@@ -1,0 +1,8 @@
+{
+  "name": "Silo - Applied Maths Reasoning & Feedback",
+  "description": "Practise maths by working through real situations. Silo checks your reasoning step by step, gives calibrated feedback, and shows you what to practise next.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
