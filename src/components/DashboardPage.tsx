@@ -14,6 +14,11 @@ import {
   X,
   Info,
   LogOut,
+  AlertCircle,
+  Check,
+  CheckCircle2,
+  Loader2,
+  ShieldAlert,
 } from 'lucide-react';
 
 interface DashboardPageProps {
@@ -22,6 +27,7 @@ interface DashboardPageProps {
   onStartSession?: (scenarioId: string) => void;
   onOpenTopicPicker?: () => void;
   onOpenReportModal?: () => void;
+  onOpenHistory?: () => void;
   onSignOut?: () => void;
 }
 
@@ -50,6 +56,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   onNavigateHome,
   onStartSession,
   onOpenTopicPicker,
+  onOpenHistory,
   onSignOut,
 }) => {
   // Navigation active tab: Dashboard by default
@@ -61,6 +68,59 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   const [hoveredInfoId, setHoveredInfoId] = useState<string | null>(null);
   const [selectedConceptFilter, setSelectedConceptFilter] = useState<'All' | 'Needs practice' | 'Getting there' | 'Secure'>('All');
   const [sortBy, setSortBy] = useState<'last-practised' | 'alphabetical' | 'sessions'>('last-practised');
+  const [firstName, setFirstName] = useState('Amara');
+  const [role, setRole] = useState('A student');
+  const [level, setLevel] = useState('University');
+  const [voiceInClips, setVoiceInClips] = useState(false);
+  const [hintsEnabled, setHintsEnabled] = useState(true);
+  const [settingsTab, setSettingsTab] = useState<'profile' | 'language' | 'privacy'>('profile');
+  const [language, setLanguage] = useState('English');
+  const [textSize, setTextSize] = useState<'Default' | 'Large' | 'Larger'>('Default');
+  const [reduceMotion, setReduceMotion] = useState(false);
+  const [highContrast, setHighContrast] = useState(false);
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [showToast, setShowToast] = useState(false);
+  const [showValidationError, setShowValidationError] = useState(false);
+  const [showCouldNotSave, setShowCouldNotSave] = useState(false);
+  const [showDownloadRequested, setShowDownloadRequested] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConsentChecked, setDeleteConsentChecked] = useState(false);
+  const [showSignOutModal, setShowSignOutModal] = useState(false);
+
+  const initialProfile = { firstName: 'Amara', role: 'A student', level: 'Senior secondary' };
+  const hasProfileChanges =
+    firstName !== initialProfile.firstName || role !== initialProfile.role || level !== initialProfile.level;
+
+  const commitSave = () => {
+    if (showValidationError) {
+      return;
+    }
+    setSaveState('saving');
+    window.setTimeout(() => {
+      setSaveState('saved');
+      setShowToast(true);
+      setShowCouldNotSave(false);
+      window.setTimeout(() => setShowToast(false), 2200);
+      setTimeout(() => {
+        setSaveState('idle');
+      }, 0);
+    }, 1000);
+  };
+
+  const discardChanges = () => {
+    setFirstName(initialProfile.firstName);
+    setRole(initialProfile.role);
+    setLevel(initialProfile.level);
+    setShowValidationError(false);
+    setShowCouldNotSave(false);
+    setSaveState('idle');
+  };
+
+  const textSizeClasses: Record<'Default' | 'Large' | 'Larger', string> = {
+    Default: 'text-[15px]',
+    Large: 'text-[17px]',
+    Larger: 'text-[19px]',
+  };
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -202,7 +262,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                   <button
                     key={item.id}
                     type="button"
-                    onClick={() => setActiveNav(item.id)}
+                    onClick={() => {
+                      setActiveNav(item.id);
+                      if (item.id === 'history' && onOpenHistory) {
+                        onOpenHistory();
+                      }
+                    }}
                     className={`flex items-center gap-2 px-3.5 py-2 rounded-[8px] text-[14px] font-medium transition-colors cursor-pointer ${
                       isActive
                         ? 'bg-[#DCEBE6] text-[#0E5A4B]'
@@ -271,6 +336,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                   onClick={() => {
                     setActiveNav(item.id);
                     setIsMobileMenuOpen(false);
+                    if (item.id === 'history' && onOpenHistory) {
+                      onOpenHistory();
+                    }
                   }}
                   className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-[8px] text-[14px] font-medium text-left ${
                     isActive
@@ -992,22 +1060,488 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
         {/* Settings tab */}
         {activeNav === 'settings' && (
-          <div className="bg-[#FFFFFF] border border-[#DDD8CC] rounded-[12px] p-6 space-y-4">
-            <h2 className="font-serif text-[20px] font-semibold text-[#17201D]">
-              Preferences & Settings
-            </h2>
-            <p className="text-[14px] text-[#4A5551]">
-              Academic level: Senior secondary Mathematics · Term 2.
-            </p>
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={onNavigateHome}
-                className="text-[13px] text-[#0E5A4B] hover:underline font-medium cursor-pointer"
-              >
-                Return to Silo Home
-              </button>
-            </div>
+          <div className="w-full max-w-[720px] flex flex-col gap-4 relative">
+            <header className="mb-2">
+              <h1 className="font-serif text-[32px] md:text-[36px] font-semibold text-[#17201D] leading-tight">
+                Settings
+              </h1>
+              <p className="text-[16px] text-[#4A5551] mt-2">
+                Manage your profile, accessibility and data.
+              </p>
+            </header>
+
+            <nav aria-label="Settings sections" className="border-b border-[#DDD8CC] mb-8 overflow-x-auto no-scrollbar">
+              <div className="flex gap-8 whitespace-nowrap min-w-max">
+                {[
+                  { id: 'profile', label: 'Profile' },
+                  { id: 'language', label: 'Language and accessibility' },
+                  { id: 'privacy', label: 'Privacy' },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    aria-current={settingsTab === tab.id ? 'page' : undefined}
+                    onClick={() => setSettingsTab(tab.id as 'profile' | 'language' | 'privacy')}
+                    className={`text-[15px] pb-3 border-b-2 transition-colors ${
+                      settingsTab === tab.id
+                        ? 'font-medium text-[#0E5A4B] border-[#0E5A4B]'
+                        : 'text-[#4A5551] hover:text-[#17201D] border-transparent'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </nav>
+
+            {settingsTab === 'profile' && (
+              <div className="w-full flex flex-col gap-4 pb-24">
+                <section className={`bg-[#FFFFFF] border border-[#DDD8CC] rounded-[12px] p-6 ${saveState === 'saving' ? 'opacity-60' : ''}`}>
+                  {showCouldNotSave && (
+                    <div className="mb-5 flex items-center gap-3 rounded-[10px] border border-[#D34545] bg-[#FDF1F1] text-[#7A1F1F] px-3 py-3 text-[14px]">
+                      <AlertCircle className="w-4 h-4 shrink-0" strokeWidth={2} />
+                      <div className="flex-1 flex items-center justify-between gap-3">
+                        <span>We could not save your changes. Try again.</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowCouldNotSave(false);
+                            setSaveState('idle');
+                          }}
+                          className="px-2.5 py-1.5 rounded-[8px] border border-[#D34545] bg-[#FFFFFF] text-[#7A1F1F] text-[12px] font-medium"
+                        >
+                          Try again
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  <h2 className="font-serif text-[20px] font-semibold text-[#17201D] mb-6">
+                    Your details
+                  </h2>
+
+                  <form className="flex flex-col gap-5" id="profile-form">
+                    <div className="flex flex-col">
+                      <div className="flex items-center mb-2">
+                        <label htmlFor="first-name" className="font-medium text-[13px] text-[#17201D]">
+                          First name
+                        </label>
+                        <span className="text-[11px] text-[#4A5551] bg-[#F4F1EA] px-2 py-0.5 rounded-[4px] ml-2 font-normal">
+                          Optional
+                        </span>
+                      </div>
+                      <input
+                        id="first-name"
+                        name="firstName"
+                        type="text"
+                        value={firstName}
+                        onChange={(event) => {
+                          setFirstName(event.target.value);
+                          setShowValidationError(/[^a-zA-Z\s]/.test(event.target.value) || event.target.value.length > 40);
+                        }}
+                        className={`h-[44px] border rounded-[8px] px-3 text-[#17201D] bg-[#FFFFFF] text-[16px] focus:border-2 focus:outline-none transition-all ${
+                          showValidationError ? 'border-[#D34545] focus:border-[#D34545]' : 'border-[#7D8883] focus:border-[#0E5A4B]'
+                        }`}
+                      />
+                      {showValidationError && (
+                        <div className="mt-2 flex items-center gap-2 text-[13px] text-[#7A1F1F]">
+                          <AlertCircle className="w-4 h-4 shrink-0" strokeWidth={2} />
+                          <span>Use letters only, up to 40 characters.</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col">
+                      <label htmlFor="email" className="font-medium text-[13px] text-[#17201D] mb-2">
+                        Email
+                      </label>
+                      <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        value="amara.okafor@example.com"
+                        readOnly
+                        className="h-[44px] border border-[#DDD8CC] rounded-[8px] px-3 text-[#17201D] bg-[#F4F1EA] text-[16px] cursor-default select-all focus:outline-none"
+                      />
+                      <p className="text-[14px] text-[#4A5551] mt-1.5">
+                        To change your email,{' '}
+                        <a href="#" className="text-[#0E5A4B] underline hover:text-[#0A4A3E] font-normal">
+                          contact support
+                        </a>
+                        .
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col">
+                      <label htmlFor="role-select" className="font-medium text-[13px] text-[#17201D] mb-2">
+                        I am
+                      </label>
+                      <div className="relative">
+                        <select
+                          id="role-select"
+                          name="role"
+                          value={role}
+                          onChange={(event) => setRole(event.target.value)}
+                          className="w-full h-[44px] appearance-none border border-[#7D8883] rounded-[8px] pl-3 pr-10 text-[#17201D] bg-[#FFFFFF] text-[16px] focus:border-2 focus:border-[#0E5A4B] focus:outline-none cursor-pointer"
+                        >
+                          <option value="A student">A student</option>
+                          <option value="Learning on my own">Learning on my own</option>
+                          <option value="A tutor">A tutor</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#4A5551]">
+                          <span className="material-symbols-outlined text-[20px]">expand_more</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col">
+                      <label htmlFor="level-select" className="font-medium text-[13px] text-[#17201D] mb-2">
+                        Level
+                      </label>
+                      <div className="relative">
+                        <select
+                          id="level-select"
+                          name="level"
+                          value={level}
+                          onChange={(event) => setLevel(event.target.value)}
+                          className="w-full h-[44px] appearance-none border border-[#7D8883] rounded-[8px] pl-3 pr-10 text-[#17201D] bg-[#FFFFFF] text-[16px] focus:border-2 focus:border-[#0E5A4B] focus:outline-none cursor-pointer"
+                        >
+                          <option value="Lower secondary">Lower secondary</option>
+                          <option value="Senior secondary">Senior secondary</option>
+                          <option value="University">University</option>
+                          <option value="Other">Other</option>
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#4A5551]">
+                          <span className="material-symbols-outlined text-[20px]">expand_more</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col pt-1">
+                      <span className="font-medium text-[13px] text-[#17201D] mb-2">Age group</span>
+                      <div>
+                        <span className="inline-flex items-center px-3 h-[32px] rounded-[8px] bg-[#F4F1EA] border border-[#DDD8CC] text-[#17201D] text-[14px] font-medium">
+                          14 to 17
+                        </span>
+                      </div>
+                      <p className="text-[14px] text-[#4A5551] mt-1.5">
+                        Your age group affects how Silo handles your data. To change it,{' '}
+                        <a href="#" className="text-[#0E5A4B] underline hover:text-[#0A4A3E] font-normal">
+                          contact support
+                        </a>
+                        .
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#DDD8CC] mt-2">
+                      <button
+                        type="button"
+                        onClick={discardChanges}
+                        className="px-4 py-2 text-[14px] font-medium text-[#4A5551] hover:text-[#17201D] bg-transparent rounded-[8px] transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (hasProfileChanges) {
+                            commitSave();
+                          }
+                        }}
+                        disabled={!hasProfileChanges || saveState === 'saving'}
+                        className={`px-5 py-2.5 rounded-[8px] text-[14px] font-medium transition-all min-w-[150px] ${
+                          hasProfileChanges && saveState !== 'saving'
+                            ? 'bg-[#0E5A4B] text-[#FFFFFF] hover:bg-[#0A4A3E] cursor-pointer'
+                            : 'bg-[#0E5A4B] opacity-50 cursor-not-allowed text-[#FFFFFF]'
+                        } ${saveState === 'saving' ? 'flex items-center justify-center' : ''}`}
+                      >
+                        {saveState === 'saving' ? (
+                          <span className="inline-flex items-center gap-2">
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Saving
+                          </span>
+                        ) : (
+                          'Save changes'
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                </section>
+              </div>
+            )}
+
+            {settingsTab === 'language' && (
+              <div className="w-full max-w-[720px] flex flex-col gap-4 pb-8">
+                <section className="bg-[#FFFFFF] border border-[#DDD8CC] rounded-[12px] p-6">
+                  <div className="flex flex-col gap-2">
+                    <label htmlFor="language" className="font-medium text-[13px] text-[#17201D]">
+                      Language
+                    </label>
+                    <select
+                      id="language"
+                      value={language}
+                      onChange={(event) => setLanguage(event.target.value)}
+                      className="h-[44px] w-full rounded-[8px] border border-[#7D8883] bg-[#FFFFFF] px-3 text-[16px] text-[#17201D] focus:border-2 focus:border-[#0E5A4B] focus:outline-none appearance-none pr-10"
+                    >
+                      <option value="English">English</option>
+                      <option value="French">French</option>
+                      <option value="Spanish">Spanish</option>
+                      <option value="Portuguese">Portuguese</option>
+                      <option value="Arabic">Arabic</option>
+                    </select>
+                    <p className="text-[14px] text-[#4A5551] mt-1">
+                      Silo's menus and messages will use this language. Lesson content may not be available in every language yet.
+                    </p>
+                  </div>
+                </section>
+
+                <section className="bg-[#FFFFFF] border border-[#DDD8CC] rounded-[12px] p-6">
+                  <div className="flex flex-col gap-4">
+                    <div>
+                      <div className="font-medium text-[13px] text-[#17201D] mb-2">
+                        Text size
+                      </div>
+                      <div className="inline-flex w-full rounded-[10px] border border-[#DDD8CC] bg-[#FAF8F4] p-1 gap-1">
+                        {(['Default', 'Large', 'Larger'] as const).map((option) => (
+                          <button
+                            key={option}
+                            type="button"
+                            onClick={() => setTextSize(option)}
+                            className={`flex-1 rounded-[8px] px-3 py-2 text-[14px] font-medium transition-colors ${
+                              textSize === option
+                                ? 'bg-[#FFFFFF] text-[#17201D] shadow-sm border border-[#DDD8CC]'
+                                : 'text-[#4A5551]'
+                            }`}
+                          >
+                            {option}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className={`rounded-[10px] bg-[#FAF8F4] border border-[#DDD8CC] p-4 ${textSizeClasses[textSize]}`}>
+                      A burger costs $4 and a drink costs $3.
+                    </div>
+
+                    <div className="flex items-center justify-between gap-4 py-1">
+                      <div className="flex-1">
+                        <div className="font-medium text-[15px] text-[#17201D]">Reduce motion</div>
+                        <div className="text-[14px] text-[#4A5551] mt-0.5">
+                          Clips show still frames with captions instead of moving steps.
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={reduceMotion}
+                        onClick={() => setReduceMotion((value) => !value)}
+                        className={`relative inline-flex h-7 w-12 flex-shrink-0 rounded-full p-0.5 transition-colors ${
+                          reduceMotion ? 'bg-[#0E5A4B]' : 'bg-[#DDD8CC]'
+                        }`}
+                      >
+                        <span className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-[#FFFFFF] transition ${reduceMotion ? 'translate-x-5' : 'translate-x-0'}`} />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-4 py-1">
+                      <div className="flex-1">
+                        <div className="font-medium text-[15px] text-[#17201D]">High contrast</div>
+                        <div className="text-[14px] text-[#4A5551] mt-0.5">
+                          Stronger borders and darker text.
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={highContrast}
+                        onClick={() => setHighContrast((value) => !value)}
+                        className={`relative inline-flex h-7 w-12 flex-shrink-0 rounded-full p-0.5 transition-colors ${
+                          highContrast ? 'bg-[#0E5A4B]' : 'bg-[#DDD8CC]'
+                        }`}
+                      >
+                        <span className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-[#FFFFFF] transition ${highContrast ? 'translate-x-5' : 'translate-x-0'}`} />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#DDD8CC] mt-2">
+                      <button type="button" className="px-4 py-2 text-[14px] font-medium text-[#4A5551] hover:text-[#17201D]">
+                        Cancel
+                      </button>
+                      <button type="button" disabled className="px-5 py-2.5 rounded-[8px] text-[14px] font-medium bg-[#0E5A4B] opacity-50 cursor-not-allowed text-[#FFFFFF] min-w-[130px]">
+                        Save changes
+                      </button>
+                    </div>
+                  </div>
+                </section>
+              </div>
+            )}
+
+            {settingsTab === 'privacy' && (
+              <div className="w-full max-w-[720px] flex flex-col gap-4 pb-8">
+                <section className="bg-[#FFFFFF] border border-[#DDD8CC] rounded-[12px] p-6">
+                  <div className="rounded-[10px] border border-[#C7D8D7] bg-[#DCEBE6] px-4 py-3 flex items-center gap-3 text-[14px] text-[#0C413A]">
+                    <Info className="w-4 h-4 shrink-0" strokeWidth={2} />
+                    <div className="flex-1">
+                      A parent or guardian agreed to how Silo uses your information on 12 Oct.
+                    </div>
+                    <button type="button" className="text-[#0E5A4B] font-medium underline">Read the privacy summary</button>
+                  </div>
+                </section>
+
+                <section className="bg-[#FFFFFF] border border-[#DDD8CC] rounded-[12px] p-6">
+                  <div className="space-y-5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <div className="font-medium text-[15px] text-[#17201D]">Download my data</div>
+                        <div className="text-[14px] text-[#4A5551] mt-0.5">
+                          We prepare a file of your account details, sessions and answers.
+                        </div>
+                      </div>
+                      {showDownloadRequested ? (
+                        <div className="flex flex-col items-stretch sm:items-end gap-2">
+                          <div className="inline-flex items-center gap-2 rounded-[10px] bg-[#DCEFE2] text-[#0B4D3C] px-3 py-2 text-[13px] border border-[#B8DCC8]">
+                            <CheckCircle2 className="w-4 h-4" strokeWidth={2} />
+                            <span>We are preparing your file. We will email it to amara.okafor@example.com within 24 hours.</span>
+                          </div>
+                          <button disabled className="px-4 py-2 rounded-[8px] border border-[#DDD8CC] bg-[#FFFFFF] text-[#4A5551] text-[14px] font-medium cursor-not-allowed opacity-80">
+                            Requested
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setShowDownloadRequested(true)}
+                          className="px-4 py-2 rounded-[8px] border border-[#DDD8CC] bg-[#FFFFFF] text-[#17201D] text-[14px] font-medium hover:bg-[#F4F1EA]"
+                        >
+                          Request download
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="border-t border-[#DDD8CC] pt-5 flex items-center justify-between gap-3">
+                      <div className="font-medium text-[15px] text-[#17201D]">What Silo keeps</div>
+                      <button type="button" className="text-[#0E5A4B] underline text-[14px] font-medium">
+                        How long we keep data
+                      </button>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="bg-[#FFFFFF] border border-[#DDD8CC] rounded-[12px] p-6 border-l-[3px] border-l-[#D34545]">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="text-[15px] text-[#17201D] leading-relaxed">
+                      This removes your account, sessions and answers. It cannot be undone.
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowDeleteModal(true)}
+                      className="px-4 py-2 rounded-[8px] border border-[#D34545] bg-[#FFFFFF] text-[#B32828] text-[14px] font-medium hover:bg-[#FFF6F6]"
+                    >
+                      Delete my account
+                    </button>
+                  </div>
+                </section>
+              </div>
+            )}
+
+            {hasProfileChanges && !showToast && !showCouldNotSave && (
+              <div className="fixed inset-x-0 bottom-0 z-50 border-t border-[#DDD8CC] bg-[#FFFFFF] shadow-[0_-4px_20px_rgba(23,32,29,0.08)]">
+                <div className="max-w-[720px] mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+                  <div className="text-[14px] font-medium text-[#17201D]">You have unsaved changes</div>
+                  <div className="flex items-center gap-2">
+                    <button type="button" onClick={discardChanges} className="text-[#4A5551] hover:text-[#17201D] text-[14px] font-medium px-2 py-1.5">
+                      Discard
+                    </button>
+                    <button
+                      type="button"
+                      onClick={commitSave}
+                      className="px-4 py-2 rounded-[8px] bg-[#0E5A4B] text-[#FFFFFF] text-[14px] font-medium hover:bg-[#0A4A3E]"
+                    >
+                      Save changes
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {showToast && (
+              <div className="fixed bottom-5 right-5 z-[60] flex items-center gap-3 rounded-[12px] bg-[#17201D] text-[#FFFFFF] shadow-lg px-4 py-3 text-[14px]">
+                <Check className="w-4 h-4 text-[#FFFFFF]" strokeWidth={2.5} />
+                <span>Changes saved</span>
+              </div>
+            )}
+
+            {showDeleteModal && (
+              <div className="fixed inset-0 z-60 bg-[#17201D]/35 flex items-center justify-center p-4">
+                <div className="w-full max-w-[480px] rounded-[12px] bg-[#FFFFFF] shadow-[0_18px_48px_rgba(23,32,29,0.18)] p-6">
+                  <h3 className="font-serif text-[28px] font-semibold text-[#17201D]">Delete your account?</h3>
+                  <p className="mt-3 text-[15px] text-[#4A5551] leading-relaxed">
+                    This removes your account, your sessions and your answers. We delete your data within 30 days. This cannot be undone.
+                  </p>
+
+                  <ul className="mt-5 space-y-3 text-[14px] text-[#17201D]">
+                    {['Your profile and settings', 'Your sessions and progress', 'Your answers and feedback'].map((item) => (
+                      <li key={item} className="flex items-center gap-3">
+                        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#FBEAEA] text-[#B32828]">
+                          <span className="text-[12px] leading-none">−</span>
+                        </span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <label className="mt-6 flex items-start gap-3 text-[14px] text-[#17201D]">
+                    <input
+                      type="checkbox"
+                      checked={deleteConsentChecked}
+                      onChange={(event) => setDeleteConsentChecked(event.target.checked)}
+                      className="mt-1 h-4 w-4 rounded border-[#7D8883] text-[#D34545] focus:ring-[#D34545]"
+                    />
+                    <span>I understand this cannot be undone.</span>
+                  </label>
+
+                  <div className="mt-6 flex items-center justify-end gap-3">
+                    <button type="button" onClick={() => setShowDeleteModal(false)} className="px-4 py-2 rounded-[8px] border border-[#DDD8CC] bg-[#FFFFFF] text-[#17201D] text-[14px] font-medium">
+                      Keep my account
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!deleteConsentChecked}
+                      onClick={() => {
+                        setShowDeleteModal(false);
+                        setDeleteConsentChecked(false);
+                      }}
+                      className={`px-4 py-2 rounded-[8px] text-[14px] font-medium ${
+                        deleteConsentChecked
+                          ? 'bg-[#D34545] text-[#FFFFFF] hover:bg-[#B32828]'
+                          : 'bg-[#D34545] opacity-50 cursor-not-allowed text-[#FFFFFF]'
+                      }`}
+                    >
+                      Delete my account
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {showSignOutModal && (
+              <div className="fixed inset-0 z-60 bg-[#17201D]/30 flex items-center justify-center p-4">
+                <div className="w-full max-w-[400px] rounded-[12px] bg-[#FFFFFF] p-6 shadow-[0_18px_48px_rgba(23,32,29,0.14)]">
+                  <h3 className="font-serif text-[28px] font-semibold text-[#17201D]">Sign out everywhere?</h3>
+                  <p className="mt-3 text-[15px] text-[#4A5551] leading-relaxed">
+                    You will need to log in again on every device, including this one.
+                  </p>
+                  <div className="mt-6 flex justify-end gap-3">
+                    <button type="button" onClick={() => setShowSignOutModal(false)} className="px-4 py-2 rounded-[8px] border border-[#DDD8CC] bg-[#FFFFFF] text-[#17201D] text-[14px] font-medium">
+                      Cancel
+                    </button>
+                    <button type="button" onClick={() => setShowSignOutModal(false)} className="px-4 py-2 rounded-[8px] bg-[#0E5A4B] text-[#FFFFFF] text-[14px] font-medium hover:bg-[#0A4A3E]">
+                      Sign out everywhere
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </main>

@@ -24,6 +24,8 @@ import { TopicPage } from './components/TopicPage.tsx';
 import { LessonClipPlayerPage } from './components/LessonClipPlayerPage.tsx';
 import { GuidedQuestionPage } from './components/GuidedQuestionPage.tsx';
 import { PracticeSubstitutionPage } from './components/PracticeSubstitutionPage.tsx';
+import { LessonCompletePage } from './components/LessonCompletePage.tsx';
+import { HistoryPage } from './components/HistoryPage.tsx';
 import { TopicPickerModal } from './components/TopicPickerModal.tsx';
 import { ReportModal } from './components/ReportModal.tsx';
 
@@ -41,10 +43,13 @@ export default function App() {
     | 'topic-page'
     | 'lesson-clip'
     | 'guided-question'
+    | 'lesson-complete'
+    | 'history'
     | 'practice-substitution'
   >('home');
   const [isTopicModalOpen, setIsTopicModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [selectedLessonId, setSelectedLessonId] = useState<string>('simultaneous-1');
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -278,6 +283,10 @@ export default function App() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           onOpenReportModal={() => setIsReportModalOpen(true)}
+          onOpenHistory={() => {
+            setCurrentPage('history');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
           onSignOut={() => {
             setUserEmail(null);
             showToast('Signed out of Silo');
@@ -314,8 +323,9 @@ export default function App() {
             setCurrentPage('dashboard');
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          onSelectLesson={(_id) => {
+          onSelectLesson={(id) => {
             setCurrentPage('lesson-clip');
+            setSelectedLessonId(id);
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           onOpenPractice={() => {
@@ -340,6 +350,7 @@ export default function App() {
           </div>
         )}
         <LessonClipPlayerPage
+          lessonId={selectedLessonId}
           onExit={() => {
             setCurrentPage('topic-page');
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -394,6 +405,58 @@ export default function App() {
         <ReportModal
           isOpen={isReportModalOpen}
           onClose={() => setIsReportModalOpen(false)}
+        />
+      </>
+    );
+  }
+
+  // Standalone Screen: Lesson complete summary
+  if (currentPage === 'lesson-complete') {
+    return (
+      <>
+        {toastMessage && (
+          <div className="fixed bottom-6 right-6 z-50 bg-[#17201D] text-white text-xs px-4 py-2.5 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in">
+            <span className="material-symbols-outlined text-[16px] text-[#1E6B3A]">
+              check_circle
+            </span>
+            <span>{toastMessage}</span>
+          </div>
+        )}
+        <LessonCompletePage
+          onBackToDashboard={() => {
+            setCurrentPage('dashboard');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onStartPractice={() => {
+            setCurrentPage('practice-substitution');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onStartLesson3={() => {
+            setCurrentPage('topic-page');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+        />
+      </>
+    );
+  }
+
+  // Standalone Screen: History
+  if (currentPage === 'history') {
+    return (
+      <>
+        {toastMessage && (
+          <div className="fixed bottom-6 right-6 z-50 bg-[#17201D] text-white text-xs px-4 py-2.5 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in">
+            <span className="material-symbols-outlined text-[16px] text-[#1E6B3A]">
+              check_circle
+            </span>
+            <span>{toastMessage}</span>
+          </div>
+        )}
+        <HistoryPage
+          onBackToDashboard={() => {
+            setCurrentPage('dashboard');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
         />
       </>
     );

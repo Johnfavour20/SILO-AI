@@ -11,10 +11,9 @@ import {
   ChevronUp,
   ChevronLeft,
   ChevronRight,
-  Layers,
-  X,
   LifeBuoy,
 } from 'lucide-react';
+import { generateGuidedQuestionFeedback } from '../lib/scenario-generator';
 
 export type GuidedFrameId =
   | 'interactive'
@@ -46,7 +45,6 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
   initialFrame = 'interactive',
 }) => {
   const [activeFrame, setActiveFrame] = useState<GuidedFrameId>(initialFrame);
-  const [isDockOpen, setIsDockOpen] = useState(true);
 
   // Form & Interaction states
   const [inputValue, setInputValue] = useState('');
@@ -56,6 +54,13 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
   const [isHintCardOpen, setIsHintCardOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [feedbackType, setFeedbackType] = useState<'mistake' | 'correct' | null>(null);
+  const [aiFeedback, setAiFeedback] = useState<{
+    whatWorked: string;
+    whatToWorkOn: string;
+    nextStep: string;
+    hint: string;
+    status: 'correct' | 'mistake';
+  } | null>(null);
   const [isStuckCardOpen, setIsStuckCardOpen] = useState(false);
   const [isCouldNotCheckOpen, setIsCouldNotCheckOpen] = useState(false);
   const [isLessonAccordionOpenMobile, setIsLessonAccordionOpenMobile] = useState(true);
@@ -219,161 +224,63 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
   };
 
   // Interactive Check Answer handler
-  const handleCheckAnswer = () => {
+  const handleCheckAnswer = async () => {
     if (activeFrame !== 'interactive') return;
+    if (!inputValue.trim()) return;
+
     setIsChecking(true);
-    setTimeout(() => {
-      setIsChecking(false);
+
+    try {
+      const result = await generateGuidedQuestionFeedback({
+        question: 'At the school fair, 2 samosas and 1 drink cost $7. 1 samosa and 3 drinks cost $11. Let s be the price of a samosa and d the price of a drink.',
+        given: 'd = 7 − 2s',
+        studentAnswer: inputValue,
+        expectedStep: 's + 3(7 − 2s) = 11',
+        topic: 'Simultaneous equations',
+        teachingStyle: 'supportive',
+      });
+
+      setAiFeedback(result);
+      setFeedbackType(result.status);
+      setIsFeedbackOpen(true);
       setAttempts((prev) => prev + 1);
-      const clean = inputValue.trim().replace(/\s+/g, '');
-      if (clean.includes('21-6s') || clean.includes('s+21-6s=11')) {
-        setFeedbackType('correct');
-        setIsFeedbackOpen(true);
-      } else {
-        setFeedbackType('mistake');
-        setIsFeedbackOpen(true);
-      }
-    }, 600);
-  };
-
-  // Switcher dock navigation
-  const currentIdx = FRAME_OPTIONS.findIndex((f) => f.id === activeFrame);
-  const handlePrevFrame = () => {
-    const prevIdx = currentIdx > 0 ? currentIdx - 1 : FRAME_OPTIONS.length - 1;
-    setActiveFrame(FRAME_OPTIONS[prevIdx].id);
-  };
-  const handleNextFrame = () => {
-    const nextIdx = currentIdx < FRAME_OPTIONS.length - 1 ? currentIdx + 1 : 0;
-    setActiveFrame(FRAME_OPTIONS[nextIdx].id);
-  };
-
-  // =========================================================================
-  // FLOATING FRAME DOCK (Allows quick viewing of all 9 frames)
-  // =========================================================================
-  const renderFloatingFrameDock = () => {
-    if (!isDockOpen) {
-      return (
-        <aside
-          aria-label="Screen preview bar"
-          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 animate-in fade-in zoom-in-95 duration-200"
-        >
-          <button
-            type="button"
-            onClick={() => setIsDockOpen(true)}
-            className="flex items-center gap-2.5 bg-[#004135] text-white px-4 py-2 rounded-full shadow-lg hover:bg-[#0A4A3E] transition-all text-xs font-semibold tracking-wide border border-white/20 hover:scale-105 active:scale-95 cursor-pointer"
-            title="Click to view all 9 generated screens and states"
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span>Switch Screens (1–9)</span>
-            <span className="bg-white/20 text-white text-[10px] px-1.5 py-0.5 rounded-full font-mono">
-              {activeFrame === 'interactive' ? 'Live' : FRAME_OPTIONS[currentIdx]?.num || '1-9'}
-            </span>
-          </button>
-        </aside>
-      );
+    } catch (error) {
+      console.warn('Unable to generate guided feedback:', error);
+      setFeedbackType('mistake');
+      setIsFeedbackOpen(true);
+      setAiFeedback({
+        status: 'mistake',
+        whatWorked: 'You correctly replaced d with 7 − 2s in the second equation.',
+        whatToWorkOn: 'The 3 must multiply every term inside the brackets, so 3(7 − 2s) becomes 21 − 6s, not 7 − 2s.',
+        nextStep: 'Rewrite the equation as s + 3(7 − 2s) = 11 and then expand the bracket before collecting s terms.',
+        hint: 'Multiply the 3 by both 7 and 2s. Remember: 3 × 7 = 21 and 3 × 2s = 6s.',
+      });
+    } finally {
+      setIsChecking(false);
     }
-
-    return (
-      <aside
-        aria-label="Screen preview bar"
-        className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-auto max-w-[96vw] bg-white/95 backdrop-blur-md border border-[#DDD8CC] rounded-2xl shadow-2xl p-2.5 flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-3 duration-200"
-      >
-        {/* Header row with navigation & close */}
-        <div className="flex items-center justify-between gap-4 px-1 pb-1 border-b border-[#DDD8CC]/50 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 text-[#004135] font-semibold">
-              <Layers className="w-3.5 h-3.5" />
-              <span>Step 3 &amp; 4 Frames (1–9)</span>
-            </span>
-            <span className="text-[11px] text-[#7D8883] font-medium hidden sm:inline">
-              (Click any screen to view)
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={handlePrevFrame}
-              className="p-1 text-[#4A5551] hover:text-[#004135] hover:bg-[#EDE9E0] rounded cursor-pointer transition-colors"
-              title="Previous screen"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <span className="text-[11px] font-mono text-[#141d1a] px-1">
-              {currentIdx + 1} / {FRAME_OPTIONS.length}
-            </span>
-            <button
-              type="button"
-              onClick={handleNextFrame}
-              className="p-1 text-[#4A5551] hover:text-[#004135] hover:bg-[#EDE9E0] rounded cursor-pointer transition-colors"
-              title="Next screen"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-            <div className="h-3.5 w-px bg-[#DDD8CC] mx-1" />
-            {onBackToClip && (
-              <button
-                type="button"
-                onClick={onBackToClip}
-                className="px-2 py-0.5 text-[11px] text-[#004135] hover:bg-[#DCEBE6] rounded font-medium transition-colors flex items-center gap-1 cursor-pointer"
-                title="Back to Step 2 clip player"
-              >
-                <RotateCcw className="w-3 h-3" />
-                <span>Step 2</span>
-              </button>
-            )}
-            {onOpenPractice && (
-              <button
-                type="button"
-                onClick={onOpenPractice}
-                className="px-2 py-0.5 text-[11px] text-[#0E5A4B] hover:bg-[#DCEBE6] rounded font-medium transition-colors flex items-center gap-1 cursor-pointer"
-                title="Practice: Substitution"
-              >
-                <span>Practice</span>
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => setIsDockOpen(false)}
-              className="p-1 text-[#7D8883] hover:text-[#141d1a] hover:bg-[#EDE9E0] rounded cursor-pointer transition-colors ml-1"
-              title="Minimize bar"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Buttons pill bar */}
-        <div className="flex items-center gap-1.5 overflow-x-auto py-0.5 no-scrollbar max-w-[92vw]">
-          {FRAME_OPTIONS.map((f) => {
-            const isCurrent = activeFrame === f.id;
-            return (
-              <button
-                key={f.id}
-                type="button"
-                onClick={() => setActiveFrame(f.id)}
-                className={`whitespace-nowrap px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
-                  isCurrent
-                    ? 'bg-[#004135] text-white shadow-xs font-semibold'
-                    : 'bg-[#FAF8F4] hover:bg-[#EDE9E0] text-[#3f4945] border border-[#DDD8CC]/70'
-                }`}
-                title={f.hint}
-              >
-                <span
-                  className={`text-[10px] px-1 py-0.2 rounded font-mono ${
-                    isCurrent ? 'bg-white/20 text-white' : 'bg-[#EDE9E0] text-[#141d1a]'
-                  }`}
-                >
-                  {f.num}
-                </span>
-                <span>{f.title}</span>
-              </button>
-            );
-          })}
-        </div>
-      </aside>
-    );
   };
+
+  const handleHintRequest = async () => {
+    if (activeFrame === '2_checking') return;
+
+    try {
+      const result = await generateGuidedQuestionFeedback({
+        question: 'At the school fair, 2 samosas and 1 drink cost $7. 1 samosa and 3 drinks cost $11. Let s be the price of a samosa and d the price of a drink.',
+        given: 'd = 7 − 2s',
+        studentAnswer: inputValue || 's + 7 − 2s = 11',
+        expectedStep: 's + 3(7 − 2s) = 11',
+        topic: 'Simultaneous equations',
+        teachingStyle: 'slow',
+      });
+      setAiFeedback(result);
+      setActiveFrame('4_hint_2');
+    } catch (error) {
+      console.warn('Unable to generate hint:', error);
+      setActiveFrame('4_hint_2');
+    }
+  };
+
+
 
   // =========================================================================
   // SUB-COMPONENTS: HEADER, WORKSPACE, ACCORDIONS
@@ -579,6 +486,17 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
             </span>
           </div>
         </div>
+
+        {onOpenPractice && (
+          <button
+            type="button"
+            onClick={onOpenPractice}
+            className="mt-2 inline-flex items-center justify-center gap-2 rounded-lg bg-[#004135] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#0A4A3E] cursor-pointer shadow-xs"
+          >
+            <span>Practice</span>
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -589,8 +507,6 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
   if (activeFrame === '9_mobile') {
     return (
       <div className="min-h-screen bg-[#EDE9E0]/40 flex flex-col items-center justify-start py-4 px-2 font-sans text-[#141d1a] antialiased pb-20">
-        {renderFloatingFrameDock()}
-
         {/* 360px Mobile Shell */}
         <div className="w-full max-w-[360px] bg-white border border-[#DDD8CC] rounded-[16px] shadow-lg overflow-hidden flex flex-col my-auto">
           {/* 1. Compact Header (back arrow, title, "Step 3 of 4") */}
@@ -781,8 +697,6 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
   // =========================================================================
   return (
     <div className="min-h-full bg-[#FAF8F4] text-[#141d1a] font-sans antialiased selection:bg-[#DCEBE6] selection:text-[#004135] flex flex-col justify-between relative pb-16">
-      {renderFloatingFrameDock()}
-
       <div>
         {renderHeader()}
 
@@ -908,7 +822,7 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
                       </div>
                     </div>
                     <p className="text-sm text-[#754600] leading-relaxed">
-                      Multiply the 3 by each term inside the brackets: 3 times 7, and 3 times 2s.
+                      {aiFeedback?.hint ?? 'Multiply the 3 by each term inside the brackets: 3 times 7, and 3 times 2s.'}
                     </p>
                   </div>
                 )}
@@ -1102,7 +1016,7 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
                     {/* Secondary Hint System */}
                     <button
                       type="button"
-                      onClick={() => setActiveFrame('4_hint_2')}
+                      onClick={() => void handleHintRequest()}
                       className="h-11 px-4 rounded-lg border border-[#DDD8CC] bg-white text-[#141d1a] text-sm font-medium hover:bg-[#F4F1EA] transition-all select-none hover:-translate-y-0.5 cursor-pointer"
                     >
                       {activeFrame === '4_hint_2' ? 'Get hint 3' : 'Get a hint'}
@@ -1131,7 +1045,7 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
                     <div className="text-sm text-[#3f4945]">
                       Your answer:{' '}
                       <span className="font-serif italic font-semibold text-[#141d1a] text-base ml-1">
-                        s + 7 − 2s = 11
+                        {inputValue || 's + 7 − 2s = 11'}
                       </span>
                     </div>
 
@@ -1145,7 +1059,7 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
                           <strong className="block text-[#1E6B3A] font-semibold mb-0.5">
                             What worked
                           </strong>
-                          You replaced d with 7 − 2s in the second equation. That is the right substitution.
+                          {aiFeedback?.whatWorked ?? 'You replaced d with 7 − 2s in the second equation. That is the right substitution.'}
                         </div>
                       </div>
 
@@ -1156,7 +1070,7 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
                           <strong className="block text-[#885200] font-semibold mb-0.5">
                             What to work on
                           </strong>
-                          The 3 multiplies everything inside the brackets. 3(7 − 2s) is 21 − 6s, not 7 − 2s.
+                          {aiFeedback?.whatToWorkOn ?? 'The 3 multiplies everything inside the brackets. 3(7 − 2s) is 21 − 6s, not 7 − 2s.'}
                         </div>
                       </div>
 
@@ -1167,7 +1081,7 @@ export const GuidedQuestionPage: React.FC<GuidedQuestionPageProps> = ({
                           <strong className="block text-[#141d1a] font-semibold mb-0.5">
                             Try this next
                           </strong>
-                          Rewrite the line with the 3 applied to both terms, then collect the s terms.
+                          {aiFeedback?.nextStep ?? 'Rewrite the line with the 3 applied to both terms, then collect the s terms.'}
                         </div>
                       </div>
                     </div>

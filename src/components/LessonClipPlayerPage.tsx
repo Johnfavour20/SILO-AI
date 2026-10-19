@@ -15,6 +15,10 @@ import {
   Smartphone,
   Monitor,
 } from 'lucide-react';
+import { questionBank } from '../data/questionBank';
+import { getStoryboardById } from '../lib/clip-storyboard';
+import { generateScenarioVariants } from '../lib/scenario-generator';
+import type { ScenarioVariant } from '../lib/math-engine';
 
 export type FrameId =
   | 'interactive'
@@ -29,6 +33,7 @@ export type FrameId =
   | '9_mobile';
 
 interface LessonClipPlayerPageProps {
+  lessonId?: string;
   onExit: () => void;
   onOpenReport?: () => void;
   onNextStep?: () => void;
@@ -36,15 +41,14 @@ interface LessonClipPlayerPageProps {
 }
 
 export const LessonClipPlayerPage: React.FC<LessonClipPlayerPageProps> = ({
+  lessonId = 'simultaneous-1',
   onExit,
   onOpenReport,
   onNextStep,
-  initialFrame = 'interactive',
+  initialFrame = '2_playing_early',
 }) => {
   // Current active frame selection
   const [activeFrame, setActiveFrame] = useState<FrameId>(initialFrame);
-  const [isDockOpen, setIsDockOpen] = useState(true);
-
   // Playback simulation states
   const [isPlaying, setIsPlaying] = useState(true);
   const [currentTime, setCurrentTime] = useState(17);
@@ -59,6 +63,50 @@ export const LessonClipPlayerPage: React.FC<LessonClipPlayerPageProps> = ({
     'food' | 'tickets' | 'slow_breakdown'
   >('food');
   const [currentStepIndex, setCurrentStepIndex] = useState(2); // Step 2: Solve one together
+  const [alternateScenario, setAlternateScenario] = useState<ScenarioVariant | null>(null);
+  const [isGeneratingAlternateScenario, setIsGeneratingAlternateScenario] = useState(false);
+  const storyboard = getStoryboardById(lessonId) ?? getStoryboardById('simultaneous-1');
+  const selectedQuestion = questionBank.find((item) => item.id === lessonId) ?? questionBank[0];
+  const defaultScenario = selectedQuestion.scenarioVariants?.[0] ?? null;
+  const activeScenario = alternateScenario ?? defaultScenario;
+  const lessonTitle = storyboard?.title ?? selectedQuestion.topic;
+  const lessonTopic = storyboard?.topic ?? selectedQuestion.topic;
+  const transcriptLines = activeScenario?.transcript ?? storyboard?.transcript ?? [
+    'Let the unknown values be variables and write the equations clearly.',
+    'Solve the system step by step and keep the reasoning visible.',
+    'Check the result against the original problem to confirm it still makes sense.',
+  ];
+
+  const effectiveTime =
+    activeFrame === '1_not_started'
+      ? 0
+      : activeFrame === '2_playing_early'
+      ? 6
+      : activeFrame === '3_paused'
+      ? 21
+      : activeFrame === '4_ended'
+      ? 32
+      : activeFrame === '7_preparing' || activeFrame === '8_error'
+      ? 0
+      : currentTime;
+
+  const currentScene = storyboard
+    ? storyboard.scenes.find(
+        (scene) => effectiveTime >= scene.startSecond && effectiveTime <= scene.endSecond,
+      ) ?? storyboard.scenes[0]
+    : undefined;
+
+  const questionDisplay = selectedQuestion.type === 'quadratic'
+    ? ['x² - 5x + 6 = 0', '(x - 2)(x - 3) = 0']
+    : selectedQuestion.type === 'word-problem'
+    ? ['Let n be the integer', 'n(n + 1) = 42']
+    : ['2b + d = 11', 'b + 2d = 10'];
+
+  const workingDisplay = selectedQuestion.type === 'quadratic'
+    ? ['x² - 5x + 6 = 0', 'x = 2 or x = 3']
+    : selectedQuestion.type === 'word-problem'
+    ? ['Let n and n + 1 be consecutive integers', 'n² + n - 42 = 0']
+    : ['d = 11 - 2b', 'b = 4 and d = 3'];
 
   // Automatically configure state variables when pinned to a specific frame
   useEffect(() => {
@@ -165,20 +213,6 @@ export const LessonClipPlayerPage: React.FC<LessonClipPlayerPageProps> = ({
     return () => clearInterval(interval);
   }, [isPlaying, speed, activeFrame]);
 
-  // Derived effective values based on active frame
-  const effectiveTime =
-    activeFrame === '1_not_started'
-      ? 0
-      : activeFrame === '2_playing_early'
-      ? 6
-      : activeFrame === '3_paused'
-      ? 21
-      : activeFrame === '4_ended'
-      ? 32
-      : activeFrame === '7_preparing' || activeFrame === '8_error'
-      ? 0
-      : currentTime;
-
   const effectiveIsPlaying =
     activeFrame === '1_not_started'
       ? false
@@ -264,13 +298,47 @@ export const LessonClipPlayerPage: React.FC<LessonClipPlayerPageProps> = ({
 
   // Caption text selection based on active frame / time
   const getCaptionText = () => {
-    if (activeFrame === '2_playing_early' || (effectiveTime >= 0 && effectiveTime <= 8)) {
-      return 'Amara paid $11 for 2 burgers and 1 drink. Chidi paid $10 for 1 burger and 2 drinks.';
+    const scene = storyboard?.scenes.find(
+      (item) => effectiveTime >= item.startSecond && effectiveTime <= item.endSecond,
+    );
+
+    if (scene) {
+      return scene.caption;
     }
+
+    if (activeScenario?.context) {
+      return activeScenario.context;
+    }
+
     if (selectedExample === 'tickets') {
       return 'Let a be adult tickets and c be child tickets. From the family pass, c = 28 − 2a.';
     }
-    return 'From the first bill, d = 11 − 2b.';
+
+    return storyboard?.transcript[0] ?? 'Let the unknown values be variables and write the equations clearly.';
+  };
+
+  const handleExplainAlternativeScenario = async (style: 'different-example' | 'slow-breakdown' = 'different-example') => {
+    setIsGeneratingAlternateScenario(true);
+    try {
+      const variants = await generateScenarioVariants({
+        question: selectedQuestion.prompt,
+        answer: selectedQuestion.answer,
+        topic: selectedQuestion.topic,
+        difficulty: selectedQuestion.difficulty,
+        teachingStyle: style === 'slow-breakdown' ? 'slow and careful' : 'practical and conversational',
+      });
+
+      const nextVariant = variants.find((variant) => variant.id !== (alternateScenario?.id ?? '')) ?? variants[0];
+      if (nextVariant) {
+        setAlternateScenario(nextVariant);
+        setSelectedExample(style === 'slow-breakdown' ? 'slow_breakdown' : 'tickets');
+      }
+    } catch (error) {
+      console.warn('Unable to generate a new scenario for this lesson:', error);
+    } finally {
+      setIsGeneratingAlternateScenario(false);
+      setIsExplainMenuOpen(false);
+    }
   };
 
   // Content for the stage depending on frame
@@ -431,193 +499,90 @@ export const LessonClipPlayerPage: React.FC<LessonClipPlayerPageProps> = ({
               : 'gap-6 sm:gap-10 md:gap-14 scale-95 sm:scale-100 md:scale-105'
           }`}
         >
-          {/* Left: Two Receipt Cards (Visible across all active playback frames) */}
           <div className="flex flex-col gap-3 w-40 sm:w-48 shrink-0 z-10">
-            {/* Bill 1 */}
             <div className="bg-white border border-[#DDD8CC] rounded-[8px] p-3 text-xs shadow-xs">
               <div className="flex items-center justify-between text-[#4A5551] font-medium pb-2 border-b border-[#DDD8CC]">
-                <span>Amara's bill</span>
+                <span>{selectedQuestion.topic}</span>
                 <span className="font-serif text-[#17201D] font-semibold text-sm">
-                  $11
+                  {selectedQuestion.type === 'quadratic' ? 'x²' : selectedQuestion.type === 'word-problem' ? 'n' : 'eq'}
                 </span>
               </div>
-              <div className="mt-2.5 flex flex-col gap-1.5">
-                <div className="flex items-center justify-between text-[#17201D]">
-                  <div className="flex items-center gap-1.5">
-                    {/* Burger SVG icon */}
-                    <svg
-                      className="shrink-0 text-[#0E5A4B]"
-                      fill="none"
-                      height="15"
-                      viewBox="0 0 24 24"
-                      width="15"
-                    >
-                      <path
-                        d="M4 11C4 7 7.5 4 12 4C16.5 4 20 7 20 11H4Z"
-                        fill="currentColor"
-                      />
-                      <rect
-                        fill="#7D8883"
-                        height="2"
-                        rx="1"
-                        width="18"
-                        x="3"
-                        y="13"
-                      />
-                      <path
-                        d="M4 17C4 18.6569 5.34315 20 7 20H17C18.6569 20 20 18.6569 20 17H4Z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                    <span>2 × burger</span>
-                  </div>
-                  <span className="text-[#4A5551] font-mono text-[11px]">2b</span>
+              <div className="mt-2.5 flex flex-col gap-1.5 text-[#17201D]">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[#4A5551]">Prompt</span>
+                  <span className="font-mono text-[11px] text-[#0E5A4B]">{selectedQuestion.difficulty}</span>
                 </div>
-                <div className="flex items-center justify-between text-[#17201D]">
-                  <div className="flex items-center gap-1.5">
-                    {/* Drink SVG icon */}
-                    <svg
-                      className="shrink-0 text-[#B45309]"
-                      fill="none"
-                      height="15"
-                      viewBox="0 0 24 24"
-                      width="15"
-                    >
-                      <path
-                        d="M6 4H18V14C18 17.3137 15.3137 20 12 20C8.68629 20 6 17.3137 6 14V4Z"
-                        fill="currentColor"
-                      />
-                      <line
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeWidth="2"
-                        x1="4"
-                        x2="20"
-                        y1="4"
-                        y2="4"
-                      />
-                    </svg>
-                    <span>1 × drink</span>
-                  </div>
-                  <span className="text-[#4A5551] font-mono text-[11px]">d</span>
+                <div className="text-[11px] leading-relaxed text-[#17201D]">
+                  {selectedQuestion.prompt.slice(0, 55)}{selectedQuestion.prompt.length > 55 ? '…' : ''}
                 </div>
               </div>
             </div>
 
-            {/* Bill 2 */}
             <div className="bg-white border border-[#DDD8CC] rounded-[8px] p-3 text-xs shadow-xs">
               <div className="flex items-center justify-between text-[#4A5551] font-medium pb-2 border-b border-[#DDD8CC]">
-                <span>Chidi's bill</span>
-                <span className="font-serif text-[#17201D] font-semibold text-sm">
-                  $10
-                </span>
+                <span>Goal</span>
+                <span className="font-serif text-[#17201D] font-semibold text-sm">{selectedQuestion.answer.split(' ').slice(0, 2).join(' ') || 'solve'}</span>
               </div>
-              <div className="mt-2.5 flex flex-col gap-1.5">
-                <div className="flex items-center justify-between text-[#17201D]">
-                  <div className="flex items-center gap-1.5">
-                    {/* Burger SVG icon */}
-                    <svg
-                      className="shrink-0 text-[#0E5A4B]"
-                      fill="none"
-                      height="15"
-                      viewBox="0 0 24 24"
-                      width="15"
-                    >
-                      <path
-                        d="M4 11C4 7 7.5 4 12 4C16.5 4 20 7 20 11H4Z"
-                        fill="currentColor"
-                      />
-                      <rect
-                        fill="#7D8883"
-                        height="2"
-                        rx="1"
-                        width="18"
-                        x="3"
-                        y="13"
-                      />
-                      <path
-                        d="M4 17C4 18.6569 5.34315 20 7 20H17C18.6569 20 20 18.6569 20 17H4Z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                    <span>1 × burger</span>
-                  </div>
-                  <span className="text-[#4A5551] font-mono text-[11px]">b</span>
-                </div>
-                <div className="flex items-center justify-between text-[#17201D]">
-                  <div className="flex items-center gap-1.5">
-                    {/* Drink SVG icon */}
-                    <svg
-                      className="shrink-0 text-[#B45309]"
-                      fill="none"
-                      height="15"
-                      viewBox="0 0 24 24"
-                      width="15"
-                    >
-                      <path
-                        d="M6 4H18V14C18 17.3137 15.3137 20 12 20C8.68629 20 6 17.3137 6 14V4Z"
-                        fill="currentColor"
-                      />
-                      <line
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeWidth="2"
-                        x1="4"
-                        x2="20"
-                        y1="4"
-                        y2="4"
-                      />
-                    </svg>
-                    <span>2 × drink</span>
-                  </div>
-                  <span className="text-[#4A5551] font-mono text-[11px]">2d</span>
-                </div>
+              <div className="mt-2.5 text-[11px] leading-relaxed text-[#17201D]">
+                {selectedQuestion.answer}
               </div>
             </div>
           </div>
 
-          {/* FRAME 2 REQUIREMENT: In Frame 2 (0:06), equations & working panels are EMPTY */}
           {activeFrame === '2_playing_early' ? (
             <div className="w-52 h-40 border border-dashed border-[#DDD8CC]/50 rounded-[8px] flex items-center justify-center text-xs text-[#7D8883] italic">
-              {/* Empty state during early introduction */}
+              {currentScene?.title ?? selectedQuestion.topic}
             </div>
           ) : (
             <>
-              {/* Centre: Equations */}
-              <div className="flex flex-col items-center justify-center font-serif italic font-normal text-2xl sm:text-3xl tracking-wide gap-3 shrink-0 text-[#17201D]">
-                <div className="flex items-center gap-1.5 whitespace-nowrap leading-none">
-                  <span>2</span>
-                  <span className="text-[#0E5A4B]">b</span>
-                  <span className="mx-1 text-[#17201D] font-normal not-italic">+</span>
-                  <span className="text-[#B45309]">d</span>
-                  <span className="mx-1.5 text-[#17201D] font-normal not-italic">=</span>
-                  <span>11</span>
+              {currentScene?.id === 'setup' && (
+                <div className="max-w-[320px] rounded-[12px] border border-[#DDD8CC] bg-white p-5 shadow-xs">
+                  <div className="text-[11px] uppercase tracking-[0.12em] text-[#4A5551]">Context</div>
+                  <div className="mt-3 font-serif text-[24px] leading-tight text-[#17201D]">
+                    {selectedQuestion.prompt}
+                  </div>
+                  <div className="mt-4 text-[12px] text-[#4A5551] font-medium">
+                    Solve for the unknowns and check the answer against the original story.
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5 whitespace-nowrap leading-none">
-                  <span className="text-[#0E5A4B]">b</span>
-                  <span className="mx-1 text-[#17201D] font-normal not-italic">+</span>
-                  <span>2</span>
-                  <span className="text-[#B45309]">d</span>
-                  <span className="mx-1.5 text-[#17201D] font-normal not-italic">=</span>
-                  <span>10</span>
-                </div>
-              </div>
+              )}
 
-              {/* Right: Working Card showing two lines of working */}
-              <div className="bg-white border border-[#DDD8CC] rounded-[8px] p-3.5 sm:p-4 w-44 sm:w-52 shrink-0 z-10 shadow-xs">
-                <span className="text-xs font-medium text-[#4A5551] block mb-2">
-                  Working
-                </span>
-                <div className="bg-[#DCEBE6] border border-[#0E5A4B]/20 rounded-[8px] px-3 py-2.5 text-xs sm:text-sm font-serif text-[#0E5A4B] font-medium leading-tight space-y-1">
-                  {/* Two lines of working as required in Frame 3 */}
-                  <span className="block text-[11px] font-sans text-[#0E5A4B] opacity-80">
-                    From bill 1:
-                  </span>
-                  <span className="block text-sm font-serif font-semibold">
-                    d = 11 − 2b
-                  </span>
+              {currentScene?.id === 'equation' && (
+                <div className="flex flex-col items-center justify-center font-serif italic font-normal text-2xl sm:text-3xl tracking-wide gap-3 shrink-0 text-[#17201D]">
+                  {questionDisplay.map((line, index) => (
+                    <div key={`${line}-${index}`} className="flex items-center gap-1.5 whitespace-nowrap leading-none">
+                      <span className={index === 0 ? 'text-[#0E5A4B]' : 'text-[#B45309]'}>{line}</span>
+                    </div>
+                  ))}
                 </div>
-              </div>
+              )}
+
+              {currentScene?.id === 'working' && (
+                <div className="bg-white border border-[#DDD8CC] rounded-[8px] p-3.5 sm:p-4 w-44 sm:w-52 shrink-0 z-10 shadow-xs">
+                  <span className="text-xs font-medium text-[#4A5551] block mb-2">
+                    Working
+                  </span>
+                  <div className="bg-[#DCEBE6] border border-[#0E5A4B]/20 rounded-[8px] px-3 py-2.5 text-xs sm:text-sm font-serif text-[#0E5A4B] font-medium leading-tight space-y-1">
+                    {workingDisplay.map((line, index) => (
+                      <span key={`${line}-${index}`} className="block text-sm font-serif font-semibold">
+                        {line}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {currentScene?.id === 'result' && (
+                <div className="max-w-[320px] rounded-[12px] border border-[#DDD8CC] bg-white p-5 shadow-xs">
+                  <div className="text-[11px] uppercase tracking-[0.12em] text-[#4A5551]">Answer</div>
+                  <div className="mt-3 font-serif text-[28px] leading-tight text-[#17201D]">
+                    {selectedQuestion.answer}
+                  </div>
+                  <div className="mt-4 text-[12px] text-[#4A5551] font-medium">
+                    This satisfies the original equation and keeps the reasoning consistent.
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
@@ -644,7 +609,7 @@ export const LessonClipPlayerPage: React.FC<LessonClipPlayerPageProps> = ({
           {/* Continuous vertical rail line strictly behind markers */}
           <div className="absolute left-3 top-3 bottom-8 w-[1px] bg-[#DDD8CC] z-0 pointer-events-none" />
 
-          {/* Step 1: Done */}
+          {/* Step 1: Watch a short clip */}
           <div
             onClick={() => setCurrentStepIndex(1)}
             className="relative z-10 flex items-start gap-3.5 pb-6 cursor-pointer group"
@@ -777,18 +742,14 @@ export const LessonClipPlayerPage: React.FC<LessonClipPlayerPageProps> = ({
           {effectiveIsTranscriptOpen && (
             <div className="text-xs text-[#4A5551] leading-relaxed pb-2 border-t border-[#DDD8CC]/50 pt-2.5 space-y-2.5">
               {/* Three timed lines as requested */}
-              <p>
-                <strong className="text-[#17201D] font-mono mr-1.5">0:00</strong>
-                <span>Look at Amara's order: two burgers and one drink cost eleven dollars.</span>
-              </p>
-              <p>
-                <strong className="text-[#17201D] font-mono mr-1.5">0:09</strong>
-                <span>We can isolate the drink variable directly by subtracting two burgers from both sides.</span>
-              </p>
-              <p>
-                <strong className="text-[#17201D] font-mono mr-1.5">0:17</strong>
-                <span>That gives us d equals eleven minus two b, ready to substitute into Chidi's equation.</span>
-              </p>
+              {transcriptLines.map((line, index) => (
+                <p key={`${line}-${index}`}>
+                  <strong className="text-[#17201D] font-mono mr-1.5">
+                    {index === 0 ? '0:00' : index === 1 ? '0:09' : '0:17'}
+                  </strong>
+                  <span>{line}</span>
+                </p>
+              ))}
             </div>
           )}
         </div>
@@ -797,144 +758,9 @@ export const LessonClipPlayerPage: React.FC<LessonClipPlayerPageProps> = ({
   };
 
   // =========================================================================
-  // SCREEN PREVIEW & FRAME DOCK (Allows quick viewing of all 9 frames + Live)
+  // SIMPLE FRAME SWITCHER: only the 4 lesson steps remain visible
   // =========================================================================
-  const FRAME_OPTIONS: { id: FrameId; num: string; title: string; hint: string }[] = [
-    { id: 'interactive', num: 'Live', title: 'Interactive', hint: 'Live playing clip with active controls' },
-    { id: '1_not_started', num: '1', title: 'Not started', hint: 'Poster overlay (0:00)' },
-    { id: '2_playing_early', num: '2', title: 'Playing early', hint: '0:06 receipts only' },
-    { id: '3_paused', num: '3', title: 'Paused', hint: '0:21 with equations & paused label' },
-    { id: '4_ended', num: '4', title: 'Ended', hint: 'Seen whole clip card & Step 2 complete' },
-    { id: '5_explain_menu', num: '5', title: 'Explain menu', hint: 'Explain popover menu open' },
-    { id: '6_voice_on', num: '6', title: 'Voice on', hint: 'Voice switch ON & recording note' },
-    { id: '7_preparing', num: '7', title: 'Preparing clip', hint: 'Pulse skeleton & status lines' },
-    { id: '8_error', num: '8', title: 'Could not load', hint: 'Error container & transcript open' },
-    { id: '9_mobile', num: '9', title: 'Mobile (360px)', hint: 'Compact mobile layout' },
-  ];
 
-  const renderFloatingFrameDock = () => {
-    const currentIdx = FRAME_OPTIONS.findIndex((f) => f.id === activeFrame);
-
-    if (!isDockOpen) {
-      return (
-        <aside
-          aria-label="Screen preview bar"
-          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 animate-in fade-in zoom-in-95 duration-200"
-        >
-          <button
-            type="button"
-            onClick={() => setIsDockOpen(true)}
-            className="flex items-center gap-2.5 bg-[#0E5A4B] text-white px-4 py-2 rounded-full shadow-lg hover:bg-[#0A4A3E] transition-all text-xs font-semibold tracking-wide border border-white/20 hover:scale-105 active:scale-95 cursor-pointer"
-            title="Click to view all 9 screens and states"
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span>Switch Screens (1–9)</span>
-            <span className="bg-white/20 text-white text-[10px] px-1.5 py-0.5 rounded-full font-mono">
-              {activeFrame === 'interactive' ? 'Live' : FRAME_OPTIONS[currentIdx]?.num || '1-9'}
-            </span>
-          </button>
-        </aside>
-      );
-    }
-
-    return (
-      <aside
-        aria-label="Screen preview bar"
-        className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-auto max-w-[96vw] bg-white/95 backdrop-blur-md border border-[#DDD8CC] rounded-2xl shadow-2xl p-2.5 flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-3 duration-200"
-      >
-        {/* Header row with navigation & close */}
-        <div className="flex items-center justify-between gap-4 px-1 pb-1 border-b border-[#DDD8CC]/50 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 text-[#0E5A4B] font-semibold">
-              <Layers className="w-3.5 h-3.5" />
-              <span>Screens &amp; States</span>
-            </span>
-            <span className="text-[11px] text-[#7D8883] font-medium hidden sm:inline">
-              (Click any screen to view)
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => {
-                const prevIdx = currentIdx > 0 ? currentIdx - 1 : FRAME_OPTIONS.length - 1;
-                setActiveFrame(FRAME_OPTIONS[prevIdx].id);
-              }}
-              className="p-1 text-[#4A5551] hover:text-[#0E5A4B] hover:bg-[#EDE9E0] rounded cursor-pointer transition-colors"
-              title="Previous screen"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <span className="text-[11px] font-mono text-[#17201D] px-1">
-              {currentIdx + 1} / {FRAME_OPTIONS.length}
-            </span>
-            <button
-              type="button"
-              onClick={() => {
-                const nextIdx = currentIdx < FRAME_OPTIONS.length - 1 ? currentIdx + 1 : 0;
-                setActiveFrame(FRAME_OPTIONS[nextIdx].id);
-              }}
-              className="p-1 text-[#4A5551] hover:text-[#0E5A4B] hover:bg-[#EDE9E0] rounded cursor-pointer transition-colors"
-              title="Next screen"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-            <div className="h-3.5 w-px bg-[#DDD8CC] mx-1" />
-            <button
-              type="button"
-              onClick={() => setIsDockOpen(false)}
-              className="p-1 text-[#7D8883] hover:text-[#17201D] hover:bg-[#EDE9E0] rounded cursor-pointer transition-colors"
-              title="Minimize bar"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Buttons pill bar */}
-        <div className="flex items-center gap-1.5 overflow-x-auto py-0.5 no-scrollbar max-w-[92vw]">
-          {FRAME_OPTIONS.map((f) => {
-            const isCurrent = activeFrame === f.id;
-            return (
-              <button
-                key={f.id}
-                type="button"
-                onClick={() => setActiveFrame(f.id)}
-                className={`whitespace-nowrap px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
-                  isCurrent
-                    ? 'bg-[#0E5A4B] text-white shadow-xs font-semibold'
-                    : 'bg-[#FAF8F4] hover:bg-[#EDE9E0] text-[#3F4945] border border-[#DDD8CC]/70'
-                }`}
-                title={f.hint}
-              >
-                <span
-                  className={`text-[10px] px-1 py-0.2 rounded font-mono ${
-                    isCurrent ? 'bg-white/20 text-white' : 'bg-[#EDE9E0] text-[#17201D]'
-                  }`}
-                >
-                  {f.num}
-                </span>
-                <span>{f.title}</span>
-              </button>
-            );
-          })}
-
-          {onNextStep && (
-            <button
-              type="button"
-              onClick={onNextStep}
-              className="whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#DCEBE6] hover:bg-[#c3e3d9] text-[#0E5A4B] border border-[#0E5A4B]/30 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
-              title="Proceed to Step 3: Guided question"
-            >
-              <span>Step 3: Guided question</span>
-              <ChevronRight className="w-3.5 h-3.5 stroke-[2.5]" />
-            </button>
-          )}
-        </div>
-      </aside>
-    );
-  };
 
   // =========================================================================
   // FRAME 9: MOBILE VIEW RENDERING (360px viewport simulation or native mobile)
@@ -942,9 +768,6 @@ export const LessonClipPlayerPage: React.FC<LessonClipPlayerPageProps> = ({
   if (activeFrame === '9_mobile') {
     return (
       <div className="min-h-screen bg-[#EDE9E0]/40 flex flex-col items-center justify-start py-4 px-2 font-sans text-[#17201D] antialiased">
-        {/* Frame Dock for easy switching */}
-        {renderFloatingFrameDock()}
-
         {/* 360px Mobile Frame Shell */}
         <div className="w-full max-w-[360px] bg-[#FAF8F4] border border-[#DDD8CC] rounded-[16px] shadow-lg overflow-hidden flex flex-col my-auto">
           {/* 1. Compact Header (back arrow, title, "Step 2 of 4") */}
@@ -958,7 +781,7 @@ export const LessonClipPlayerPage: React.FC<LessonClipPlayerPageProps> = ({
               <ArrowLeft className="w-4 h-4" />
             </button>
             <h1 className="font-serif text-base font-medium text-[#17201D] tracking-tight">
-              Substitution
+              {lessonTitle}
             </h1>
             <span className="text-xs text-[#4A5551] font-medium">
               Step 2 of 4
@@ -1080,28 +903,28 @@ export const LessonClipPlayerPage: React.FC<LessonClipPlayerPageProps> = ({
                   <button
                     type="button"
                     onClick={() => {
-                      setSelectedExample('tickets');
-                      setIsExplainMenuOpen(false);
+                      void handleExplainAlternativeScenario('different-example');
                     }}
-                    className="w-full text-left p-2 rounded hover:bg-[#FAF8F4] transition-colors"
+                    disabled={isGeneratingAlternateScenario}
+                    className="w-full text-left p-2 rounded hover:bg-[#FAF8F4] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     <div className="text-xs font-medium text-[#17201D]">
-                      Use a different example
+                      {isGeneratingAlternateScenario ? 'Generating another example…' : 'Use a different example'}
                     </div>
                     <div className="text-[11px] text-[#4A5551] mt-0.5">
-                      Work through isolating a variable with tickets instead of food orders.
+                      Work through isolating a variable with a new real-world context.
                     </div>
                   </button>
                   <button
                     type="button"
                     onClick={() => {
-                      setSelectedExample('slow_breakdown');
-                      setIsExplainMenuOpen(false);
+                      void handleExplainAlternativeScenario('slow-breakdown');
                     }}
-                    className="w-full text-left p-2 rounded hover:bg-[#FAF8F4] transition-colors"
+                    disabled={isGeneratingAlternateScenario}
+                    className="w-full text-left p-2 rounded hover:bg-[#FAF8F4] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     <div className="text-xs font-medium text-[#17201D]">
-                      Go through it more slowly
+                      {isGeneratingAlternateScenario ? 'Preparing a slower breakdown…' : 'Go through it more slowly'}
                     </div>
                     <div className="text-[11px] text-[#4A5551] mt-0.5">
                       Adds pause points after every algebraic manipulation.
@@ -1164,15 +987,14 @@ export const LessonClipPlayerPage: React.FC<LessonClipPlayerPageProps> = ({
                 </button>
                 {effectiveIsTranscriptOpen && (
                   <div className="pt-2 text-[11px] text-[#4A5551] space-y-2">
-                    <p>
-                      <strong className="text-[#17201D]">0:00</strong> Look at Amara's order: two burgers and one drink cost eleven dollars.
-                    </p>
-                    <p>
-                      <strong className="text-[#17201D]">0:09</strong> We can isolate the drink variable directly by subtracting two burgers from both sides.
-                    </p>
-                    <p>
-                      <strong className="text-[#17201D]">0:17</strong> That gives us d equals eleven minus two b, ready to substitute into Chidi's equation.
-                    </p>
+                    {transcriptLines.map((line, index) => (
+                      <p key={`${line}-${index}`}>
+                        <strong className="text-[#17201D]">
+                          {index === 0 ? '0:00' : index === 1 ? '0:09' : '0:17'}
+                        </strong>{' '}
+                        {line}
+                      </p>
+                    ))}
                   </div>
                 )}
               </div>
@@ -1188,9 +1010,6 @@ export const LessonClipPlayerPage: React.FC<LessonClipPlayerPageProps> = ({
   // =========================================================================
   return (
     <div className="w-full min-h-screen bg-[#FAF8F4] text-[#17201D] font-sans antialiased selection:bg-[#DCEBE6] selection:text-[#0E5A4B] flex flex-col justify-between relative pb-16">
-      {/* Floating Screen & State Switcher Bar */}
-      {renderFloatingFrameDock()}
-
       <div>
         {/* Top Navigation Bar (64px) - Stays identical in every desktop frame */}
         <header className="w-full bg-[#FAF8F4] border-b border-[#DDD8CC] h-16 sticky top-0 z-20">
@@ -1208,10 +1027,10 @@ export const LessonClipPlayerPage: React.FC<LessonClipPlayerPageProps> = ({
             {/* Centre: Lesson title & subline */}
             <div className="text-center flex flex-col items-center justify-center">
               <h1 className="font-serif text-lg font-medium leading-none text-[#17201D]">
-                Substitution
+                {lessonTitle}
               </h1>
               <p className="text-xs text-[#4A5551] mt-1 leading-none">
-                Simultaneous equations
+                {lessonTopic}
               </p>
             </div>
 
@@ -1425,23 +1244,23 @@ export const LessonClipPlayerPage: React.FC<LessonClipPlayerPageProps> = ({
                         <button
                           type="button"
                           onClick={() => {
-                            setSelectedExample('tickets');
-                            setIsExplainMenuOpen(false);
+                            void handleExplainAlternativeScenario('different-example');
                           }}
-                          className={`w-full text-left p-2.5 rounded-[6px] transition-colors cursor-pointer ${
+                          disabled={isGeneratingAlternateScenario}
+                          className={`w-full text-left p-2.5 rounded-[6px] transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed ${
                             selectedExample === 'tickets'
                               ? 'bg-[#DCEBE6] border border-[#0E5A4B]/30'
                               : 'hover:bg-[#FAF8F4]'
                           }`}
                         >
                           <div className="text-xs font-semibold text-[#17201D] flex items-center justify-between">
-                            <span>Use a different example</span>
-                            {selectedExample === 'tickets' && (
+                            <span>{isGeneratingAlternateScenario ? 'Generating another example…' : 'Use a different example'}</span>
+                            {selectedExample === 'tickets' && !isGeneratingAlternateScenario && (
                               <Check className="w-3.5 h-3.5 text-[#0E5A4B] stroke-[2.5]" />
                             )}
                           </div>
                           <p className="text-[11px] text-[#4A5551] mt-1 leading-snug">
-                            Work through isolating a variable with tickets instead of food orders.
+                            Work through isolating a variable with a new real-world context.
                           </p>
                         </button>
 
@@ -1449,19 +1268,18 @@ export const LessonClipPlayerPage: React.FC<LessonClipPlayerPageProps> = ({
                         <button
                           type="button"
                           onClick={() => {
-                            setSelectedExample('slow_breakdown');
-                            setSpeed('0.75x');
-                            setIsExplainMenuOpen(false);
+                            void handleExplainAlternativeScenario('slow-breakdown');
                           }}
-                          className={`w-full text-left p-2.5 rounded-[6px] transition-colors cursor-pointer mt-1 ${
+                          disabled={isGeneratingAlternateScenario}
+                          className={`w-full text-left p-2.5 rounded-[6px] transition-colors cursor-pointer mt-1 disabled:opacity-60 disabled:cursor-not-allowed ${
                             selectedExample === 'slow_breakdown'
                               ? 'bg-[#DCEBE6] border border-[#0E5A4B]/30'
                               : 'hover:bg-[#FAF8F4]'
                           }`}
                         >
                           <div className="text-xs font-semibold text-[#17201D] flex items-center justify-between">
-                            <span>Go through it more slowly</span>
-                            {selectedExample === 'slow_breakdown' && (
+                            <span>{isGeneratingAlternateScenario ? 'Preparing a slower breakdown…' : 'Go through it more slowly'}</span>
+                            {selectedExample === 'slow_breakdown' && !isGeneratingAlternateScenario && (
                               <Check className="w-3.5 h-3.5 text-[#0E5A4B] stroke-[2.5]" />
                             )}
                           </div>
